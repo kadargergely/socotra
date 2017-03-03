@@ -11,7 +11,7 @@
       <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
    </columnResizePolicy>
    <columns>
-      <TableColumn editable="false" minWidth="109.0" prefWidth="182.0" sortable="false" text="Név" />
-      <TableColumn editable="false" maxWidth="164.0" minWidth="60.0" prefWidth="90.0" sortable="false" text="Pontszám" />
+      <TableColumn fx:id="nameColumn" editable="false" minWidth="109.0" prefWidth="182.0" sortable="false" text="Név" />
+      <TableColumn fx:id="scoreColumn" editable="false" maxWidth="164.0" minWidth="60.0" prefWidth="90.0" sortable="false" text="Pontszám" />
    </columns>
 </TableView>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Gergely Kadar
+ * Copyright (C) 2017 Gergely Kadar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,30 +15,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.undieb.kg.socotra.view;
+package hu.undieb.kg.socotra.util;
 
-import hu.undieb.kg.socotra.model.GameState;
-import hu.undieb.kg.socotra.model.Tile;
+import javafx.scene.control.Alert;
 
 /**
- * This interface contains methods that the controller of a view should implement. These methods are
- * called to update the view to reflect the current state of the game.
  *
  * @author Gergely Kadar
  */
-public interface GameView {
-
-//	public void updateBoard();
-//	
-//    public void updateBoardTile(int row, int col, Tile tile);
-//
-//    public void updateTrayTiles(int index, Tile tile);
-//
-//    public void updateTileInHand(Tile tile);
+public class AlertCreator {
     
-//    public void update(GameState gameState);
+    private AlertCreator() {        
+    }
     
-    public void update();
-    
-    public void drawTileInHand(Tile tileInHand);
+    public static void showErrorMessage(String title, String text) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(text);
+        alert.showAndWait();
+    }
 }

@@ -25,18 +25,16 @@ public class RemotePlayer implements Player {
     
     private String name;
     private int score;
-    private GameManager gameManager;
     private Tray tray;
     
-    public RemotePlayer(String name, GameManager gameManager) {
+    public RemotePlayer(String name) {
         this.name = name;
         this.score = 0;
-        this.gameManager = gameManager;
         this.tray = new Tray();
-    }
+    }    
 
     @Override
-    public void endOfTurn(GameManager.TurnAction action) {
+    public void alterTray(int index) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -46,17 +44,32 @@ public class RemotePlayer implements Player {
     }
 
     @Override
-    public void setBagSize(int size) {
+    public void endOfTurn(GameManager.TurnAction action, Player player) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void setBagSeed(long seed) {
+    public void gameStarted(long bagSeed) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public Tile[] getTrayTiles() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void redrawTiles(Bag bag) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }    
 
     @Override
     public String getName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setName(String name) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

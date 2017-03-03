@@ -17,8 +17,10 @@
  */
 package hu.undieb.kg.socotra.controller;
 
-import hu.undieb.kg.socotra.model.GameState;
+import hu.undieb.kg.socotra.model.GameManager;
+import hu.undieb.kg.socotra.model.GameObserver;
 import hu.undieb.kg.socotra.model.LocalHumanPlayer;
+import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.Tile;
 import hu.undieb.kg.socotra.view.GameView;
 
@@ -26,30 +28,74 @@ import hu.undieb.kg.socotra.view.GameView;
  *
  * @author Gergely Kadar
  */
-public class GameWindowController implements GameView {
+public class GameWindowController implements GameView, GameObserver {
 
     private ScoreTableController scoreTableCtr;
     private ChatController chatCtr;
     private HistoryController historyCtr;
     private MenuBarController menuBarCtr;
     private CanvasController canvasCtr;
+    private ButtonsController buttonsCtr;
 
+    private GameManager gameManager;
     private LocalHumanPlayer player;
 
-    public GameWindowController() {
-        scoreTableCtr = new ScoreTableController();
+    public GameWindowController(GameManager gameManager, LocalHumanPlayer player) {
+        this.gameManager = gameManager;
+        this.player = player;
+        
+        scoreTableCtr = new ScoreTableController(this);
         chatCtr = new ChatController();
-        historyCtr = new HistoryController();
+        historyCtr = new HistoryController(this);
         menuBarCtr = new MenuBarController();
         canvasCtr = new CanvasController(this);
+        buttonsCtr = new ButtonsController(this);
+    }
+
+    @Override
+    public void trayAltered(int index, Player player) {
+        update();
+    }
+
+    @Override
+    public void boardAltered(int row, int col, Player player) {
+        update();
+    }
+
+    @Override
+    public void turnEnded(GameManager.TurnAction action, Player player) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void gameStarted(long bagSeed) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     void mousePressedOnBoard(int row, int col) {
-        player.mousePressedOnBoard(row, col);
+        gameManager.alterBoard(row, col, player);        
     }
-    
+
     void mousePressedOnTray(int index) {
-        player.mousePressedOnTray(index);
+        player.alterTray(index);
+    }
+
+    void handleDoneButton() {
+        if (gameManager.endTurn(GameManager.TurnAction.PLAY, player)) {
+            update();
+        }
+    }
+
+    void handleRedrawButton() {
+        if (gameManager.endTurn(GameManager.TurnAction.SWAP, player)) {
+            update();
+        }
+    }
+
+    void handlePassButton() {
+        if (gameManager.endTurn(GameManager.TurnAction.PASS, player)) {
+            update();
+        }
     }
 
 //    @Override
@@ -66,7 +112,6 @@ public class GameWindowController implements GameView {
 //    public void updateTrayTiles(int index, Tile tile) {
 //        canvasCtr.updateTrayTile(index, tile);
 //    }
-
     public enum WindowType {
         SINGLE_PLAYER,
         MULTIPLAYER
@@ -92,15 +137,37 @@ public class GameWindowController implements GameView {
         return canvasCtr;
     }
 
-	@Override
-	public void update(GameState gameState) {		
-		
-	}
+    public ButtonsController getButtonsCtr() {
+        return buttonsCtr;
+    }
 
-	@Override
-	public void drawTileInHand(Tile tileInHand) {
-		// TODO Auto-generated method stub
-		
-	}
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+
+    public void setGameManager(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+//    public void setPlayer(LocalHumanPlayer player) {
+//        this.player = player;
+//    }
+
+    @Override
+    public void update() {
+        canvasCtr.repaint();
+        scoreTableCtr.update();
+        historyCtr.update();
+    }
+
+    @Override
+    public void drawTileInHand(Tile tileInHand) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

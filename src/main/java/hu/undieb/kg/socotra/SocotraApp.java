@@ -17,7 +17,10 @@
  */
 package hu.undieb.kg.socotra;
 
+import hu.undieb.kg.socotra.controller.AddPlayerController;
+import hu.undieb.kg.socotra.controller.GameInitializer;
 import hu.undieb.kg.socotra.controller.GameWindowController;
+import hu.undieb.kg.socotra.controller.LobbyController;
 import hu.undieb.kg.socotra.controller.LoginController;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -25,8 +28,14 @@ import hu.undieb.kg.socotra.controller.LoginRegisterController;
 import hu.undieb.kg.socotra.controller.MiddleGridPaneController;
 import hu.undieb.kg.socotra.controller.RegisterController;
 import hu.undieb.kg.socotra.controller.TestWindowController;
+import hu.undieb.kg.socotra.controller.NewGameController;
+import hu.undieb.kg.socotra.model.GameManager;
 import hu.undieb.kg.socotra.view.ResizableCanvas;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -36,6 +45,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +70,10 @@ public class SocotraApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        showGameWindow(GameWindowController.WindowType.MULTIPLAYER);
-        //showTestWindow();
+        showNewGameWindow(true);
+        // showGameWindow(GameWindowController.WindowType.MULTIPLAYER);
+        // showTestWindow();
+
         LOGGER.info("GUI started.");
     }
 
@@ -157,7 +169,11 @@ public class SocotraApp extends Application {
         try {
             BorderPane gameWindowBorderPane = new BorderPane();
             GridPane gameWindowGridPane = new GridPane();
-            gameWindowCtr = new GameWindowController();
+
+            InputStreamReader inputStream = new InputStreamReader(SocotraApp.class.getResourceAsStream("/hu_HU.dic"), "UTF-8");
+            List<String> playerNames = Arrays.asList("Játékos", "Számítógép");
+//            List<GameInitializer.PlayerType> playerTypes = Arrays.asList(GameManager.PlayerType.HUMAN, GameManager.PlayerType.COMPUTER);
+//            gameWindowCtr = GameInitializer.initGame(inputStream, playerNames, playerTypes);
 
             gameWindowBorderPane.setTop(loadNode("/fxmls/MenuBar.fxml", gameWindowCtr.getMenuBarCtr()));
 
@@ -172,6 +188,7 @@ public class SocotraApp extends Application {
                 AnchorPane.setRightAnchor(scoreTable, 12.0);
                 Node chat = loadNode("/fxmls/Chat.fxml", gameWindowCtr.getChatCtr());
                 AnchorPane.setBottomAnchor(chat, 25.0);
+                AnchorPane.setTopAnchor(chat, 210.0);
                 AnchorPane.setLeftAnchor(chat, 12.0);
                 AnchorPane.setRightAnchor(chat, 12.0);
                 leftRootPane.getChildren().addAll(scoreTable, chat);
@@ -198,16 +215,20 @@ public class SocotraApp extends Application {
                 middleGridPaneCtr.getGridPane().getRowConstraints().get(1).prefHeightProperty().bind(middleGridPaneCtr.getGridPane().widthProperty());
                 middleGridPaneCtr.getGridPane().getColumnConstraints().get(1).prefWidthProperty().bind(middleGridPaneCtr.getGridPane().heightProperty());
 
-                // Creating right pane with game history table
+                // Creating right pane with game history table and buttons
                 AnchorPane rightRootPane = new AnchorPane();
                 rightRootPane.setPrefSize(350, 275);
                 rightRootPane.setMinWidth(150);
                 Node history = loadNode("/fxmls/History.fxml", gameWindowCtr.getHistoryCtr());
                 AnchorPane.setTopAnchor(history, 25.0);
-                AnchorPane.setBottomAnchor(history, 25.0);
+                AnchorPane.setBottomAnchor(history, 175.0);
                 AnchorPane.setLeftAnchor(history, 12.0);
                 AnchorPane.setRightAnchor(history, 12.0);
-                rightRootPane.getChildren().add(history);
+                Node buttons = loadNode("/fxmls/EndTurnButtons.fxml", gameWindowCtr.getButtonsCtr());
+                AnchorPane.setBottomAnchor(buttons, 0.0);
+                AnchorPane.setLeftAnchor(buttons, 12.0);
+                AnchorPane.setRightAnchor(buttons, 12.0);
+                rightRootPane.getChildren().addAll(history, buttons);
                 GridPane.setHgrow(rightRootPane, Priority.SOMETIMES);
                 GridPane.setVgrow(rightRootPane, Priority.SOMETIMES);
                 GridPane.setConstraints(rightRootPane, 3, 1);
@@ -237,6 +258,49 @@ public class SocotraApp extends Application {
 
             LOGGER.debug("primaryStage.getHeight() = " + String.valueOf(primaryStage.getHeight()));
             LOGGER.debug("scene.getHeight() = " + String.valueOf(scene.getHeight()));
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    public void showNewGameWindow(boolean multiplayer) {
+        try {
+            AnchorPane rootPane = (AnchorPane) loadNode("/fxmls/NewGame.fxml", new NewGameController(this, multiplayer));
+            Scene scene = new Scene(rootPane);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Socotra");
+            primaryStage.setMinWidth(640);
+            primaryStage.setMinHeight(480);
+            primaryStage.show();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    public void showNewPlayerWindow(AddPlayerController addPlayerController) {
+        try {
+            AnchorPane pane = (AnchorPane) loadNode("/fxmls/AddPlayer.fxml", addPlayerController);
+            Scene scene = new Scene(pane);
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(primaryStage);
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    public void showLobbyWindow(LobbyController ctr) {
+        try {
+            AnchorPane pane = (AnchorPane) loadNode("/fxmls/Lobby.fxml", ctr);
+            Scene scene = new Scene(pane);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Socotra");
+            primaryStage.setMinWidth(550);
+            primaryStage.setMinHeight(300);
+            primaryStage.show();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }

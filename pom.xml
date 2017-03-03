@@ -204,6 +204,7 @@
             </plugins>
         </pluginManagement>
     </build>
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -234,7 +235,18 @@
             <version>2.4.3</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>kryonet</groupId>
+            <artifactId>kryonet</artifactId>
+            <version>2.21</version>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.0</version>
+        </dependency>
     </dependencies>
+    
     <reporting>
         <plugins>
             <plugin>
@@ -275,6 +287,10 @@
         <repository>
             <id>local_oracle</id>
             <url>file://${project.basedir}/lib</url>
+        </repository>
+        <repository>
+            <id>clojars</id>
+            <url>http://clojars.org/repo/</url>
         </repository>
     </repositories>
 </project>

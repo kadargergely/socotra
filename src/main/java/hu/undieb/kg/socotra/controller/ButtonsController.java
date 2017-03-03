@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Gergely Kadar
+ * Copyright (C) 2017 Gergely Kadar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,39 +15,45 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.undieb.kg.socotra.model;
+package hu.undieb.kg.socotra.controller;
 
-import java.util.Collections;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 
 /**
  *
  * @author Gergely Kadar
  */
-public class Bag {    
+public class ButtonsController {
 
-    private final Deque<Tile> BAG;
-
-    public Bag() {        
-        BAG = new LinkedList<>(Letters.generateTiles());
-    }
-
-    public Tile getTile() {
-        return BAG.pollFirst();
-    }
-
-    public int getNumOfTiles() {
-        return BAG.size();
-    }
-
-    public void putBackTile(Tile tile) {
-        BAG.addFirst(tile);
+    @FXML
+    private Button doneButton;
+    @FXML
+    private Button redrawButton;
+    @FXML
+    private Button passButton;
+    @FXML
+    private Label timerLabel;
+    
+    private final GameWindowController mainCtr;
+    
+    public ButtonsController(GameWindowController ctr) {
+        this.mainCtr = ctr;
     }
     
-    public void shuffle(long seed) {
-        Collections.shuffle((List<?>) BAG, new Random(seed));
+    @FXML
+    private void doneButtonClicked() {
+        mainCtr.handleDoneButton();
+    }
+    
+    @FXML
+    private void redrawButtonClicked() {
+        mainCtr.handleRedrawButton();
+    }
+    
+    @FXML
+    private void passButtonClicked() {
+        mainCtr.handlePassButton();
     }
 }

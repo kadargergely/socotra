@@ -29,17 +29,20 @@ public interface Player {
      *
      * @param row the row index of the changed game board field
      * @param col the column index of the changed game board field
-     * @param tile the new tile on the field ({@code null}, if the tile has been picked up) 
+     * @param tile the new tile on the field ({@code null}, if the tile has been picked up)
      */
     public void boardAltered(int row, int col, Tile tile);
+    
+    public void alterTray(int index);
 
     /**
-     * Using this method, a player can be notified about the end of a turn. The player should check
-     * if he/she is the next one.
+     * Using this method, a player can be notified about the end of a turn. The player who ended the
+     * turn is given as parameter.
      *
      * @param action the way the turn ended
+     * @param player the player who ended the turn
      */
-    public void endOfTurn(GameManager.TurnAction action);
+    public void endOfTurn(GameManager.TurnAction action, Player player);
 
     /**
      * The player draws tiles from the bag given.
@@ -49,20 +52,34 @@ public interface Player {
     public void drawTiles(Bag bag);
 
     /**
-     * Using this method, a player can be notified about the number of letters left in the bag. Most
-     * useful to remote players who synchronize their bag based on this information.
+     * The player puts back his/her tiles into the bag, and draws new ones.
      *
-     * @param size
+     * @param bag the bag to perform the action with
      */
-    public void setBagSize(int size);
+    public void redrawTiles(Bag bag);
+
+//    /**
+//     * Using this method, a player can be notified about the number of letters left in the bag. Most
+//     * useful to remote players who synchronize their bag based on this information.
+//     *
+//     * @param size
+//     */
+//    public void setBagSize(int size);
 
     /**
-     * Used to produce an identic permutation of the letters in the bag for all players at the
-     * beginning of the game.
-     *
-     * @param seed the seed used to shuffle the letters in the bag
+     * Notifies the player about the start of the game.
+     * 
+     * @param bagSeed the seed used to shuffle the bag
      */
-    public void setBagSeed(long seed);
+    public void gameStarted(long bagSeed);
+
+//    /**
+//     * Sets the seed to shuffle the bag. After a player redraws his/her tiles, the bag is shuffled.
+//     * The same seed has to be set for each player, to keep the bag synchronized for remote players.
+//     *
+//     * @param seed the seed used to shuffle the letters in the bag
+//     */
+//    public void setBagShuffleSeed(long seed);
 
     /**
      * Returns the name of the player.
@@ -70,6 +87,8 @@ public interface Player {
      * @return the name of the player
      */
     public String getName();
+    
+    public void setName(String name);
 
     /**
      * Sets the score of the player.
@@ -98,4 +117,6 @@ public interface Player {
      * @return the tile
      */
     public Tile getTileInHand();
+
+    public Tile[] getTrayTiles();
 }

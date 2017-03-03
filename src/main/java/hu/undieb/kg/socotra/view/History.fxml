@@ -6,12 +6,12 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<TableView maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="275.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<TableView fx:id="historyTable" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="275.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <columns>
-    <TableColumn maxWidth="143.0" minWidth="38.0" prefWidth="38.0" text="Lépés" />
-    <TableColumn minWidth="50.0" text="Játékos" />
-      <TableColumn editable="false" minWidth="50.0" prefWidth="110.0" sortable="false" text="Szó/Szavak" />
-      <TableColumn editable="false" prefWidth="47.0" text="Pontszám" />
+    <TableColumn fx:id="turnColumn" maxWidth="143.0" minWidth="38.0" prefWidth="38.0" text="Lépés" />
+    <TableColumn fx:id="playerColumn" minWidth="50.0" text="Játékos" />
+      <TableColumn fx:id="wordColumn" editable="false" minWidth="50.0" prefWidth="110.0" sortable="false" text="Szó/Szavak" />
+      <TableColumn fx:id="scoreColumn" editable="false" prefWidth="47.0" text="Pontszám" />
   </columns>
    <columnResizePolicy>
       <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

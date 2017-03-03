@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Gergely Kadar
+ * Copyright (C) 2017 Gergely Kadar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,30 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.undieb.kg.socotra.view;
-
-import hu.undieb.kg.socotra.model.GameState;
-import hu.undieb.kg.socotra.model.Tile;
+package hu.undieb.kg.socotra.util;
 
 /**
- * This interface contains methods that the controller of a view should implement. These methods are
- * called to update the view to reflect the current state of the game.
  *
  * @author Gergely Kadar
  */
-public interface GameView {
+public class StringConstants {
 
-//	public void updateBoard();
-//	
-//    public void updateBoardTile(int row, int col, Tile tile);
-//
-//    public void updateTrayTiles(int index, Tile tile);
-//
-//    public void updateTileInHand(Tile tile);
-    
-//    public void update(GameState gameState);
-    
-    public void update();
-    
-    public void drawTileInHand(Tile tileInHand);
+    public static final String LOCAL_PLAYER = "Helyi játékos";
+    public static final String COMPUTER = "Számítógép";
+    public static final String REMOTE_PLAYER = "Távoli játékos";
+    public static final String INVALID_NAME = "Hibás név";
+    public static final String ENTER_VALID_NAME = "Kérlek, adj meg egy megfelelő nevet!";
+    public static final String EXISTING_NAME = "Már létező név";
+    public static final String ENTER_NEW_NAME = "Ez a név már létezik. Kérlek, adj meg másikat!";
+    public static final String CONNECTED = "Csatlakozva";
+    public static final String WAITING_FOR_PLAYER = "Várkozás a játékosra...";
 }

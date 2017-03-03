@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Gergely Kadar
+ * Copyright (C) 2017 Gergely Kadar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,30 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.undieb.kg.socotra.view;
-
-import hu.undieb.kg.socotra.model.GameState;
-import hu.undieb.kg.socotra.model.Tile;
+package hu.undieb.kg.socotra.model;
 
 /**
- * This interface contains methods that the controller of a view should implement. These methods are
- * called to update the view to reflect the current state of the game.
  *
  * @author Gergely Kadar
  */
-public interface GameView {
-
-//	public void updateBoard();
-//	
-//    public void updateBoardTile(int row, int col, Tile tile);
-//
-//    public void updateTrayTiles(int index, Tile tile);
-//
-//    public void updateTileInHand(Tile tile);
+public interface GameObserver {
     
-//    public void update(GameState gameState);
+    public void trayAltered(int index, Player player);
     
-    public void update();
+    public void boardAltered(int row, int col, Player player);
     
-    public void drawTileInHand(Tile tileInHand);
+    public void turnEnded(GameManager.TurnAction action, Player player);
+    
+    public void gameStarted(long bagSeed);  
+    
+//    public void gameEnded();
 }

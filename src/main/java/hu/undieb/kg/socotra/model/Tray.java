@@ -151,4 +151,8 @@ public class Tray {
     public Tile getTileAt(int index) {
         return TILES[index];
     }
+    
+    public Tile[] getTiles() {
+        return TILES;
+    }
 }

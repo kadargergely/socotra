@@ -24,26 +24,24 @@ package hu.undieb.kg.socotra.model;
 public class ComputerPlayer implements Player {
     
     private String name;
-    private int score;
-    private GameManager gameManager;
+    private int score;   
     private Tray tray;
     
-    public ComputerPlayer(String name, GameManager gameManager) {
+    public ComputerPlayer(String name) {
         this.name = name;
         this.score = 0;
-        this.gameManager = gameManager;
         this.tray = new Tray();
+    }
+
+    @Override
+    public void alterTray(int index) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void boardAltered(int row, int col, Tile tile) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void endOfTurn(GameManager.TurnAction action) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    }    
 
     @Override
     public void drawTiles(Bag bag) {
@@ -51,18 +49,33 @@ public class ComputerPlayer implements Player {
     }
 
     @Override
-    public void setBagSize(int size) {
+    public void endOfTurn(GameManager.TurnAction action, Player player) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void setBagSeed(long seed) {
+    public void gameStarted(long bagSeed) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public Tile[] getTrayTiles() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void redrawTiles(Bag bag) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }   
 
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

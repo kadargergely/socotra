@@ -38,7 +38,6 @@ public class CanvasController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocotraApp.class);
     private Image backgroundImage;
-    private Tile[][] boardTiles;
 
     private final double TILE_SIZE = 0.0563636363636364;
     private final double FIELD_SIZE = 0.0581818181818182;
@@ -51,13 +50,12 @@ public class CanvasController {
     private double mouseY;
 
     private GraphicsContext gc;
-    private Tile tileInHand;
+
     private Font tileLetterFont;
 
     private double tileSize;
     private Image tileSprite;
     private Font tileValueFont;
-    private Tile[] trayTiles;
 
     private GameWindowController mainCtr;
 
@@ -66,45 +64,22 @@ public class CanvasController {
         tileLetterFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), tileSize * 0.7);
         tileValueFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), tileSize * 0.3);
         backgroundImage = new Image(CanvasController.class.getResource("/images/scrabble_board.png").toString());
-    }
-
-    private void drawBoard() {
-
-    }
+    }    
 
     private void drawTile(Tile tile, double x, double y) {
         gc.setFill(Color.BEIGE);
         gc.setStroke(Color.BLACK);
         gc.fillRect(x, y, tileSize, tileSize);
         gc.strokeRect(x, y, tileSize, tileSize);
-        if (!"_".equals(tile.getLetter())) {
-            gc.setFill(Color.DARKSLATEGREY);
-            gc.setFont(tileLetterFont);
-            gc.fillText(tile.getLetter(), (int) (x + tileSize * 0.5), (int) (y + tileSize * 0.4));
-            if (tile.getValue() > 0) {
-                gc.setFont(tileValueFont);
-                gc.fillText(String.valueOf(tile.getValue()), x + tileSize * 0.8, y + tileSize * 0.8);
-            }
+
+        gc.setFill(Color.DARKSLATEGREY);
+        gc.setFont(tileLetterFont);
+        gc.fillText(tile.getLetter(), (int) (x + tileSize * 0.5), (int) (y + tileSize * 0.4));
+        if (tile.getValue() > 0) {
+            gc.setFont(tileValueFont);
+            gc.fillText(String.valueOf(tile.getValue()), x + tileSize * 0.8, y + tileSize * 0.8);
         }
-    }
-
-    public void drawTileOnBoard(Tile tile, int row, int col) {
-
-    }
-
-//    private void drawTile(Tile tile, double x, double y) {
-//        gc.setFill(Color.DARKSLATEGREY);
-//        gc.setFont(tileLetterFont);
-//        gc.drawImage(tileSprite, x, y, tileSize, tileSize);
-//        //tileLetterFont.
-//        gc.fillText(tile.getLetter(), x + tileSize * 0.5, y + tileSize * 0.35);
-//        gc.setFont(tileValueFont);
-//        gc.fillText(String.valueOf(tile.getValue()), x + tileSize, y);
-//    }
-    private void fillCanvas() {
-        gc.setFill(Color.GREEN);
-        gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-    }
+    }   
 
     public Canvas getCanvas() {
         return canvas;
@@ -136,26 +111,35 @@ public class CanvasController {
         repaint();
     }
 
-    private void repaint() {
+    public void repaint() {
         // draw board
         gc.drawImage(backgroundImage, 0, 0, canvas.getWidth(), canvas.getHeight());
         gc.setFill(Color.DARKGREEN);
         gc.fillRect(canvas.getWidth() * (153.0 / 550.0), canvas.getHeight() * (494.0 / 550.0),
                 canvas.getWidth() * (244.0 / 550.0), canvas.getHeight() * (52.0 / 550.0));
         // draw tiles on board
+        Tile[][] boardTiles = mainCtr.getGameManager().getGameBoardTiles();
         for (int i = 0; i < boardTiles.length; i++) {
             for (int j = 0; j < boardTiles[i].length; j++) {
-                drawTile(boardTiles[i][j], canvas.getWidth() * (35.0 / 550.0) + j * canvas.getWidth() * (32.0 / 550.0),
-                        canvas.getHeight() * (10.0 / 550.0) + i * canvas.getHeight() * (32.0 / 550));
+                if (boardTiles[i][j] != null) {
+                    drawTile(boardTiles[i][j], canvas.getWidth() * (35.0 / 550.0) + j * canvas.getWidth() * (32.0 / 550.0),
+                            canvas.getHeight() * (10.0 / 550.0) + i * canvas.getHeight() * (32.0 / 550));
+                }
             }
         }
         // draw tiles on tray
+        Tile[] trayTiles = mainCtr.getPlayer().getTrayTiles();
         for (int i = 0; i < trayTiles.length; i++) {
-            drawTile(trayTiles[i], canvas.getWidth() * (163.0 / 550.0) + i * canvas.getWidth() * (32.0 / 550.0),
-                    canvas.getHeight() * (504.0 / 550.0));
+            if (trayTiles[i] != null) {
+                drawTile(trayTiles[i], canvas.getWidth() * (163.0 / 550.0) + i * canvas.getWidth() * (32.0 / 550.0),
+                        canvas.getHeight() * (504.0 / 550.0));
+            }
         }
         // draw tile in hand
-        drawTile(tileInHand, mouseX, mouseY);
+        Tile tileInHand = mainCtr.getPlayer().getTileInHand();
+        if (tileInHand != null) {
+            drawTile(tileInHand, mouseX, mouseY);
+        }
 //        drawTile(new Tile("TY", 10), canvas.getWidth() * (35.0 / 550.0), canvas.getHeight() * (10.0 / 550.0));
     }
 
@@ -172,18 +156,4 @@ public class CanvasController {
         gc.setTextAlign(TextAlignment.CENTER);
     }
 
-    public void updateBoardTile(int row, int col, Tile tile) {
-        boardTiles[row][col] = tile;
-        repaint();
-    }
-
-    public void updateTileInHand(Tile tile) {
-        tileInHand = tile;
-        repaint();
-    }
-
-    public void updateTrayTile(int index, Tile tile) {
-        trayTiles[index] = tile;
-        repaint();
-    }
 }

@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import hu.undieb.kg.socotra.view.GameView;
+import java.util.StringJoiner;
 
 /**
  *
@@ -48,26 +49,71 @@ public class GameManager {
         PASS
     }
 
-    public enum PlayerType {
-        HUMAN,
-        COMPUTER,
-        REMOTE
-    }   
+    
 
-    private List<Player> players;
+    public class PlayedWord {
+
+        public final int TURN;
+        public final String PLAYER_NAME;
+        public final String WORD;
+        public final int SCORE;
+
+        public PlayedWord(int turn, String playerName, String word, int score) {
+            this.TURN = turn;
+            this.PLAYER_NAME = playerName;
+            this.WORD = word;
+            this.SCORE = score;
+        }
+    }
+
+    private Players players;
     private int currentPlayer;
     private boolean boardLegal;
     private boolean movableTiles;
     private boolean wordsCorrect;
     private int turn;
     private int numOfPasses;
+    private List<PlayedWord> playedWords;
+
+    private static final String REDRAW = "<csere>";
+    private static final String PASS = "<passz>";
 
     private GameBoard gameBoard;
     private Bag bag;
+    private long bagSeed;
     private Dictionary dictionary;
-    private NetworkManager networkManager;
+
+    private List<GameObserver> observers;
+
+    public GameManager(InputStreamReader inputStream, Players players)
+            throws FileNotFoundException {
+        gameBoard = new GameBoard();
+        this.players = players;
+        bag = new Bag();
+        dictionary = new Dictionary(inputStream);
+    }
     
-    private GameView gameView;
+    public void addObserver(GameObserver observer) {
+        observers.add(observer);
+    }
+    
+    public void addObservers(List<GameObserver> observers) {
+        this.observers = observers;
+    }
+
+    public void startGame(long bagSeed) {
+//        bagSeed = Double.doubleToLongBits(Math.random());
+        this.bagSeed = bagSeed;
+        bag.shuffle(bagSeed);
+        observers.forEach(o -> o.gameStarted(bagSeed));
+
+        currentPlayer = 0;
+        boardLegal = true;
+        movableTiles = false;
+        wordsCorrect = true;
+        turn = 1;
+        numOfPasses = 0;
+    }
 
     /**
      * Constructs a new {@code GameManager} object with the given players and input stream to read
@@ -79,44 +125,42 @@ public class GameManager {
      * @param gameView
      * @throws FileNotFoundException when failed to find the dictionary file
      */
-    public GameManager(InputStreamReader inputStream, List<String> playerNames, List<PlayerType> playerTypes, GameView gameView)
-            throws FileNotFoundException {
-        gameBoard = new GameBoard();
-        players = new ArrayList<>();
-        for (int i = 0; i < playerNames.size(); i++) {
-            switch (playerTypes.get(i)) {
-                case HUMAN:
-                    players.add(new LocalHumanPlayer(playerNames.get(i), this, gameView));
-                case COMPUTER:
-                    players.add(new ComputerPlayer(playerNames.get(i), this));
-                case REMOTE:
-                    players.add(new RemotePlayer(playerNames.get(i), this));
-            }
-        }
-        long bagSeed = Double.doubleToLongBits(Math.random());
-        bag = new Bag(bagSeed);
-        players.forEach(p -> p.setBagSeed(bagSeed));
-        dictionary = new Dictionary(inputStream);
-
-        currentPlayer = 0;
-        boardLegal = true;
-        movableTiles = false;
-        wordsCorrect = true;
-        turn = 0;
-        numOfPasses = 0;
-    }
-
-    /**
-     * Returns true if the current turn is the given player's one, false otherwise. This method is
-     * usually called by the players to check themselves.
-     *
-     * @param player the player
-     * @return {@code true} if the current turn is the given player's one, {@code false} otherwise
-     */
-    public boolean isPlayersTurn(Player player) {
-        return players.get(currentPlayer) == player;
-    }
-
+//    public GameManager(InputStreamReader inputStream, List<String> playerNames, List<PlayerType> playerTypes, GameView gameView)
+//            throws FileNotFoundException {
+//        gameBoard = new GameBoard();
+//        players = new ArrayList<>();
+//        for (int i = 0; i < playerNames.size(); i++) {
+//            switch (playerTypes.get(i)) {
+//                case HUMAN:
+//                    players.add(new LocalHumanPlayer(playerNames.get(i), this, gameView));
+//                case COMPUTER:
+//                    players.add(new ComputerPlayer(playerNames.get(i), this));
+//                case REMOTE:
+//                    players.add(new RemotePlayer(playerNames.get(i), this));
+//            }
+//        }
+////        long bagSeed = Double.doubleToLongBits(Math.random());
+//        bag = new Bag(bagSeed);
+//        players.forEach(p -> p.setBagSeed(bagSeed));
+//        dictionary = new Dictionary(inputStream);
+//
+//        currentPlayer = 0;
+//        boardLegal = true;
+//        movableTiles = false;
+//        wordsCorrect = true;
+//        turn = 0;
+//        numOfPasses = 0;
+//    }
+//    /**
+//     * Returns true if the current turn is the given player's one, false otherwise. This method is
+//     * usually called by the players to check themselves.
+//     *
+//     * @param player the player
+//     * @return {@code true} if the current turn is the given player's one, {@code false} otherwise
+//     */
+//    public boolean isPlayersTurn(Player player) {
+//        return players.get(currentPlayer) == player;
+//    }
     // TODO: update documentation!
     /**
      * Alters a field on the board if the given player is the current one. Returns {@code true} if
@@ -128,101 +172,121 @@ public class GameManager {
      * @return {@code true} if the board has been successfully altered, {@code false} otherwise
      */
     public boolean alterBoard(int row, int col, Player player) {
-        if (players.get(currentPlayer) == player) {
-            players.stream().filter(p -> p != player).forEach(p -> {
-                p.boardAltered(row, col, players.get(currentPlayer).getTileInHand());
-            });
+        if (players.getCurrentPlayer() == player) {
+//            players.stream().filter(p -> p != player).forEach(p -> {
+//                p.boardAltered(row, col, player.getTileInHand());
+//            });
 
-            if (players.get(currentPlayer).getTileInHand() == null) {
+            if (player.getTileInHand() == null) {
                 Tile pickedUpTile = gameBoard.pickUpTile(row, col);
                 if (pickedUpTile != null) {
-                    players.get(currentPlayer).setTileInHand(pickedUpTile);
+                    player.setTileInHand(pickedUpTile);
+                } else {
+                    return false;
                 }
-            } else if (gameBoard.setTile(row, col, players.get(currentPlayer).getTileInHand())) {
-                players.get(currentPlayer).setTileInHand(null);
+            } else if (gameBoard.setTile(row, col, player.getTileInHand())) {
+                player.setTileInHand(null);
             } else {
                 return false;
             }
-            
+
+            boardLegal = gameBoard.isLegal(turn == 1);
+            if (boardLegal) {
+
+            }
+
+            observers.forEach(o -> o.boardAltered(row, col, player));
+
             return true;
         } else {
             return false;
         }
     }
 
-    /**
-     * Updates the graphical user interface based the current status of the game from the
-     * perspective of the player given, using the {@link GameView} instance given.
-     *
-     * @param player the player who requests the update
-     * @param gameView the {@link GameView} instance of which methods are called to update the view
-     */
-    public void updateGameView(Player player, GameView gameView) {
+    public boolean endTurn(TurnAction action, Player player) {
+        if (players.getCurrentPlayer() == player) {
+//            players.stream().filter(p -> p != player).forEach(p -> {
+//                p.endOfTurn(action, player);
+//            });
 
+            if (null != action) {
+                switch (action) {
+                    case PLAY:
+                        numOfPasses = 0;
+                        int points = gameBoard.calcPoints();
+                        player.setScore(player.getScore() + points);
+                        List<String> wordsCurrentTurn = gameBoard.getPlayedWords();
+                        StringJoiner sj = new StringJoiner(", ");
+                        wordsCurrentTurn.stream().forEach(w -> sj.add(w));
+                        playedWords.add(new PlayedWord(turn, player.getName(), sj.toString(), points));
+                        player.drawTiles(bag);
+                        gameBoard.finalizeFields();
+                        break;
+                    case SWAP:
+                        numOfPasses = 0;
+                        playedWords.add(new PlayedWord(turn, player.getName(), REDRAW, 0));
+                        player.redrawTiles(bag);
+                        bag.shuffle(bagSeed);
+                        break;
+                    case PASS:
+                        numOfPasses++;
+                        if (gameEnded()) {
+                            // TODO handle game ended
+                        }
+                        playedWords.add(new PlayedWord(turn, player.getName(), PASS, 0));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            turn++;
+            players.next();
+
+            return true;
+        } else {
+            return false;
+        }
     }
-    
+
+    private boolean gameEnded() {
+        return numOfPasses == 2 * players.getNumOfPlayers();
+    }
+
     public List<String> getPlayerNames() {
-    	List<String> playerNames = new ArrayList<>();
-    	for (Player player : players) {
-    		playerNames.add(player.getName());
-    	}
-    	return playerNames;
+        return players.getPlayerNames();
     }
-    
+
     public List<Integer> getPlayerScores() {
-    	List<Integer> playerScores = new ArrayList<>();
-    	for (Player player : players) {
-    		playerScores.add(player.getScore());
-    	}
-    	return playerScores;
+        return players.getPlayerScores();
     }
 
-	public int getCurrentPlayer() {
-		return currentPlayer;
-	}
+    public List<PlayedWord> getPlayedWords() {
+        return playedWords;
+    }
 
-	public boolean isBoardLegal() {
-		return boardLegal;
-	}
+    public int getCurrentPlayer() {
+        return currentPlayer;
+    }
 
-	public boolean isMovableTiles() {
-		return movableTiles;
-	}
+    public boolean isBoardLegal() {
+        return boardLegal;
+    }
 
-	public boolean isWordsCorrect() {
-		return wordsCorrect;
-	}
+    public boolean isMovableTiles() {
+        return movableTiles;
+    }
 
-	public int getTurn() {
-		return turn;
-	}
+    public boolean isWordsCorrect() {
+        return wordsCorrect;
+    }
+
+    public int getTurn() {
+        return turn;
+    }
 
     public Tile[][] getGameBoardTiles() {
-    	return gameBoard.getTiles();
+        return gameBoard.getTiles();
     }
-    
-    public GameState getGameState() {
-    	GameState currentGameState = new GameState();
-    	
-    	List<String> playerNames = new ArrayList<>();
-    	for (Player player : players) {
-    		playerNames.add(player.getName());
-    	}
-    	currentGameState.setPlayerNames(playerNames);
-    	
-    	List<Integer> playerScores = new ArrayList<>();
-    	for (Player player : players) {
-    		playerScores.add(player.getScore());
-    	}
-    	currentGameState.setPlayerScores(playerScores);
-    	
-    	currentGameState.setGameBoardTiles(gameBoard.getTiles());
-    	currentGameState.setCurrentPlayer(currentPlayer);
-    	currentGameState.setBoardLegal(boardLegal);
-    	currentGameState.setWordsCorrect(wordsCorrect);
-    	currentGameState.setMovableTiles(movableTiles);
-    	currentGameState.setTurn(turn);
-    	
-    	return currentGameState;
-    }
+
 }

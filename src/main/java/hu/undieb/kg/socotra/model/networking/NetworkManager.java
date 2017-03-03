@@ -17,15 +17,60 @@
  */
 package hu.undieb.kg.socotra.model.networking;
 
-import hu.undieb.kg.socotra.model.RemotePlayer;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryonet.EndPoint;
 
 /**
  *
  * @author Gergely Kadar
  */
 public class NetworkManager {
- 
-    public void addRemotePlayer(RemotePlayer player) {
-        
+
+    public static final int DEFAULT_PORT = 54555;
+
+    private NetworkManager() {
+    }
+
+    public static class BoardAltered {
+
+        public int ROW;
+        public int COL;
+        public String PLAYER_NAME;
+    }
+
+    public static class TrayAltered {
+
+        public int INDEX;
+        public String PLAYER_NAME;
+    }
+
+    public static class TurnEnded {
+
+        public String TURN_ACTION;
+        public String PLAYER_NAME;
+    }
+
+    public static class GameStarted {
+
+        public long BAG_SEED;
+        public String PLAYER_NAME;
+    }
+
+    public static class RegisterPlayer {
+
+        public String PLAYER_NAME;
+    }
+
+    public static class PlayerJoined {
+
+    }
+
+    public static void register(EndPoint endPoint) {
+        Kryo kryo = endPoint.getKryo();
+        kryo.register(BoardAltered.class);
+        kryo.register(TrayAltered.class);
+        kryo.register(TurnEnded.class);
+        kryo.register(GameStarted.class);
+        kryo.register(RegisterPlayer.class);
     }
 }
