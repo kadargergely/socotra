@@ -17,8 +17,6 @@
  */
 package hu.undieb.kg.socotra.controller;
 
-import com.sun.webkit.plugin.PluginManager;
-import hu.undieb.kg.socotra.SocotraApp;
 import hu.undieb.kg.socotra.model.ComputerPlayer;
 import hu.undieb.kg.socotra.model.GameManager;
 import hu.undieb.kg.socotra.model.GameObserver;
@@ -27,14 +25,15 @@ import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.Players;
 import hu.undieb.kg.socotra.model.RemotePlayer;
 import hu.undieb.kg.socotra.model.networking.GameClient;
+import hu.undieb.kg.socotra.model.networking.GameEndPoint;
 import hu.undieb.kg.socotra.model.networking.GameServer;
-import hu.undieb.kg.socotra.model.networking.NetworkManager;
+import hu.undieb.kg.socotra.model.persistence.ServerDAO;
+import hu.undieb.kg.socotra.util.StringConstants;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observer;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +43,8 @@ import java.util.stream.Collectors;
 public class GameInitializer {
 
     public static final int MAX_PLAYERS = 4;
+    public static final int DEFAULT_THINKING_TIME = 180;
+    public static final int DEFAULT_TIME_EXTENSIONS = 3;
 
     public enum PlayerType {
         HUMAN,
@@ -70,10 +71,14 @@ public class GameInitializer {
 
     private List<PlayerSlot> playerSlots;
     private List<GameObserver> observers;
+    private GameEndPoint gameEndPoint;
+    private ServerDAO serverDAO;
 
-    public GameInitializer() {
+    public GameInitializer(ServerDAO serverDAO) {
         playerSlots = new ArrayList<>();
         observers = new ArrayList<>();
+        gameEndPoint = null;
+        this.serverDAO = serverDAO;
     }
 
 //    public static GameWindowController initGame(InputStreamReader inputStream, List<String> playerNames, List<PlayerType> playerTypes)
@@ -122,6 +127,7 @@ public class GameInitializer {
         if (humanPlayer == null) {
             return null;
         }
+        gameEndPoint.setGameManager(gameManager);
         GameWindowController gameWindowController = new GameWindowController(gameManager, humanPlayer);
         observers.add(gameWindowController);
         gameManager.addObservers(observers);
@@ -166,14 +172,20 @@ public class GameInitializer {
         return player;
     }
 
-    public void createServer(int port) throws IOException {
-        GameServer gameServer = new GameServer(port);
-        observers.add(gameServer);
+    public void createServer(int port, LobbyController lobbyController) throws IOException {
+        try {
+            GameServer gameServer = new GameServer(port, lobbyController);
+            observers.add(gameServer);
+            gameEndPoint = gameServer;
+        } catch (IOException e) {
+            throw new IOException(StringConstants.SERVER_CREATION_FAILED_MSG, e.getCause());
+        }
     }
 
     public void createClient(String host, int port) throws IOException {
         GameClient gameClient = new GameClient(host, port);
         observers.add(gameClient);
+        gameEndPoint = gameClient;
     }
 
     public List<PlayerSlot> getPlayerSlots() {

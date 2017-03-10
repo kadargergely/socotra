@@ -18,12 +18,6 @@
 package hu.undieb.kg.socotra.controller;
 
 import hu.undieb.kg.socotra.SocotraApp;
-import hu.undieb.kg.socotra.model.GameManager;
-import hu.undieb.kg.socotra.model.Player;
-import hu.undieb.kg.socotra.model.networking.GameServer;
-import hu.undieb.kg.socotra.util.StringConstants;
-import java.util.List;
-import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,32 +25,71 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 /**
  *
  * @author Gergely Kadar
  */
-public class LobbyController {
-
+public class JoinServerController {
+    
+    @FXML
+    private Button addServerButton;
+    @FXML
+    private Button connectButton;
+    @FXML
+    private Button refreshButton;
+    @FXML
+    private TableColumn playerStatusColumn;
+    @FXML
+    private TableColumn playerTypeColumn;
+    @FXML
+    private TableColumn serverNameColumn;
+    @FXML
+    private TableColumn playersColumn;
+    @FXML
+    private TableColumn playerNameColumn;
+    @FXML
+    private TableView availableServersTable;
     @FXML
     private TableView playersTable;
     @FXML
-    private TableColumn nameColumn;
+    private TextField extendTimeField;
     @FXML
-    private TableColumn typeColumn;
+    private TextField serverNameField;
     @FXML
-    private TableColumn statusColumn;
-    @FXML
-    private TextArea playerDataTextArea;
-    @FXML
-    private Button startButton;
-    @FXML
-    private Button exitButton;
-
+    private TextField timeField;
+    
+    public class AvailableServer  {
+        
+        private SimpleStringProperty name;
+        private SimpleStringProperty players;
+        
+        public AvailableServer(String name, String players) {
+            this.name = new SimpleStringProperty(name);
+            this.players = new SimpleStringProperty(players);
+        }
+        
+        public String getName() {
+            return name.get();
+        }
+        
+        public String getPlayers() {
+            return players.get();
+        }
+        
+        public void setName(String name) {
+            this.name.set(name);
+        }
+        
+        public void setPlayers(String players) {
+            this.players.set(players);
+        }
+    }
+    
     public class PlayerInGame {
-
+        
         private SimpleStringProperty name;
         private SimpleStringProperty type;
         private SimpleStringProperty status;
@@ -91,52 +124,29 @@ public class LobbyController {
             this.status.set(status);
         }
     }
-
+    
+    private ObservableList<AvailableServer> availableServers;
+    private ObservableList<PlayerInGame> playersInGame;
+    
     private SocotraApp mainApp;
-    private GameInitializer gameInitializer;
-
-    private ObservableList<PlayerInGame> tableData;
-
-    public LobbyController(GameInitializer gameInitializer) {
-        this.gameInitializer = gameInitializer;
+    
+    public JoinServerController(SocotraApp mainApp) {
+        this.mainApp = mainApp;
     }
-
+    
     @FXML
     private void initialize() {
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        tableData = FXCollections.observableArrayList();
-        playersTable.setItems(tableData);
-
-        for (GameInitializer.PlayerSlot ps : gameInitializer.getPlayerSlots()) {
-            String name = ps.player.getName();
-            String type = "";
-            switch (ps.playerType) {
-                case HUMAN:
-                    type = StringConstants.LOCAL_PLAYER;
-                    break;
-                case COMPUTER:
-                    type = StringConstants.COMPUTER;
-                    break;
-                case REMOTE:
-                    type = StringConstants.REMOTE_PLAYER;
-                    break;
-            }
-            String status = ps.isFree() ? StringConstants.WAITING_FOR_PLAYER : StringConstants.CONNECTED;
-            tableData.add(new PlayerInGame(name, type, status));
-        }
-    }
-
-    public void playerConnected(String playerName) {
-        for (PlayerInGame p : tableData) {
-            if (p.getType().equals(StringConstants.REMOTE_PLAYER) && p.getName().equals(StringConstants.WAITING_FOR_PLAYER)) {
-                p.setName(playerName);
-                p.setStatus(StringConstants.CONNECTED);
-                gameInitializer.remotePlayerJoined(playerName);
-                break;
-            }
-        }
+        serverNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        playersColumn.setCellValueFactory(new PropertyValueFactory<>("players"));
+        
+        availableServers = FXCollections.observableArrayList();
+        availableServersTable.setItems(availableServers);
+        
+        playerNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        playerTypeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        playerStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        playersInGame = FXCollections.observableArrayList();
+        playersTable.setItems(playersInGame);
     }
 }

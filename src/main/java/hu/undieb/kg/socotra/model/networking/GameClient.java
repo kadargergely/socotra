@@ -30,7 +30,7 @@ import java.io.IOException;
  *
  * @author Gergely Kadar
  */
-public class GameClient implements GameObserver {
+public class GameClient implements GameObserver, GameEndPoint {
 
     private Client client;
     private GameManager gameManager;
@@ -42,7 +42,7 @@ public class GameClient implements GameObserver {
     public GameClient(String host, int port) throws IOException {
         client = new Client();
         client.start();
-//        this.gameManager = gameManager;
+        gameManager = null;
 //        this.playerName = playerName;
 
         NetworkManager.register(client);
@@ -83,5 +83,9 @@ public class GameClient implements GameObserver {
     public void turnEnded(GameManager.TurnAction action, Player player) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
+    @Override
+    public void setGameManager(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
 }

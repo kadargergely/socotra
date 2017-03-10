@@ -27,6 +27,7 @@ import com.esotericsoftware.kryonet.EndPoint;
 public class NetworkManager {
 
     public static final int DEFAULT_PORT = 54555;
+    public static final String LOCALHOST = "127.0.0.1";
 
     private NetworkManager() {
     }

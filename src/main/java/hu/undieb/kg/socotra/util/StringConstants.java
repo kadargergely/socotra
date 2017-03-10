@@ -22,6 +22,9 @@ package hu.undieb.kg.socotra.util;
  * @author Gergely Kadar
  */
 public class StringConstants {
+    
+    private StringConstants() {
+    }
 
     public static final String LOCAL_PLAYER = "Helyi játékos";
     public static final String COMPUTER = "Számítógép";
@@ -31,5 +34,14 @@ public class StringConstants {
     public static final String EXISTING_NAME = "Már létező név";
     public static final String ENTER_NEW_NAME = "Ez a név már létezik. Kérlek, adj meg másikat!";
     public static final String CONNECTED = "Csatlakozva";
-    public static final String WAITING_FOR_PLAYER = "Várkozás a játékosra...";
+    public static final String WAITING_FOR_PLAYER = "Várakozás a játékosra...";
+    public static final String SERVER_CREATION_FAILED_TITLE = "Szerver létrehozási hiba";
+    public static final String SERVER_CREATION_FAILED_MSG = "Szerver létrehozása nem sikerült. Próbálkozz másik porttal!";
+    public static final String INVALID_SERVER_NAME_TITLE = "Nem megfelelő szerver név";
+    public static final String INVALID_SERVER_NAME_MSG = "Kérlek, adj meg egy megfelelő szerver nevet!";
+    public static final String FAILED_TO_GET_EXTERNAL_IP = "Nem sikerült lekérdezni a külső IP címet. Próbálkozz később!";
+    public static final String INVALID_TIMER_PROP_TITLE = "Nem megfelelő időkorlát beállítások";
+    public static final String INVALID_TIMER_PROP_MSG = "Kérlek, adj meg megfelelő értékeket a gondolkodási idővel kapcsolatos beállításokhoz!";
+    public static final String INVALID_SERVER_PORT_TITLE = "Nem megfelelő szerver port";
+    public static final String INVALID_SERVER_PORT_MSG = "Kérlek, adj meg megfelelő értéket a szerver portnak!";
 }

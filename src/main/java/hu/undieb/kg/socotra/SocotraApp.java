@@ -298,8 +298,8 @@ public class SocotraApp extends Application {
             Scene scene = new Scene(pane);
             primaryStage.setScene(scene);
             primaryStage.setTitle("Socotra");
-            primaryStage.setMinWidth(550);
-            primaryStage.setMinHeight(300);
+            primaryStage.setMinWidth(600);
+            primaryStage.setMinHeight(350);
             primaryStage.show();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);

@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Gergely Kadar
  */
-public class GameServer implements GameObserver {
+public class GameServer implements GameObserver, GameEndPoint {
 
     private Server server;
     private GameManager gameManager;
@@ -44,7 +44,7 @@ public class GameServer implements GameObserver {
         public String PLAYER_NAME;
     }
 
-    public GameServer(int port) throws IOException {
+    public GameServer(int port, LobbyController lobbyController) throws IOException {
         server = new Server() {
             @Override
             protected Connection newConnection() {
@@ -64,7 +64,7 @@ public class GameServer implements GameObserver {
                 if (object instanceof NetworkManager.BoardAltered) {
                     NetworkManager.BoardAltered boardAltered = (NetworkManager.BoardAltered) object;
                     Player player = GameServer.this.players.getPlayerByName(boardAltered.PLAYER_NAME);
-                    if (player != null) {
+                    if (player != null && GameServer.this.gameManager != null) {
                         GameServer.this.gameManager.alterBoard(boardAltered.ROW, boardAltered.COL, player);
                     }
                     return;
@@ -80,7 +80,7 @@ public class GameServer implements GameObserver {
                 if (object instanceof NetworkManager.TurnEnded) {
                     NetworkManager.TurnEnded turnEnded = (NetworkManager.TurnEnded) object;
                     Player player = GameServer.this.players.getPlayerByName(turnEnded.PLAYER_NAME);
-                    if (player != null) {
+                    if (player != null && GameServer.this.gameManager != null) {
                         GameServer.this.gameManager.endTurn(GameManager.TurnAction.valueOf(turnEnded.TURN_ACTION), player);
                     }
                     return;
@@ -91,13 +91,15 @@ public class GameServer implements GameObserver {
                 }
                 if (object instanceof NetworkManager.RegisterPlayer) {
                     connection.PLAYER_NAME = ((NetworkManager.RegisterPlayer) object).PLAYER_NAME;
-                    
+                    lobbyController.playerConnected(connection.PLAYER_NAME);
                 }
             }
         });
         
         server.bind(port);
         server.start();
+        
+        this.lobbyController = lobbyController;
     }
 
     @Override
@@ -127,6 +129,11 @@ public class GameServer implements GameObserver {
         NetworkManager.GameStarted gameStarted = new NetworkManager.GameStarted();
         gameStarted.BAG_SEED = bagSeed;
         server.sendToAllTCP(gameStarted);
+    }
+    
+    @Override
+    public void setGameManager(GameManager gameManager) {
+        this.gameManager = gameManager;
     }
 
     private void sendToAllExceptPlayer(String playerName, Object object) {
