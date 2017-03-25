@@ -18,6 +18,7 @@
 package hu.undieb.kg.socotra.controller;
 
 import hu.undieb.kg.socotra.SocotraApp;
+import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.networking.NetworkManager;
 import hu.undieb.kg.socotra.model.networking.NetworkUtils;
 import hu.undieb.kg.socotra.model.persistence.DBConnectionException;
@@ -29,6 +30,8 @@ import hu.undieb.kg.socotra.model.persistence.ServerEntity;
 import hu.undieb.kg.socotra.util.AlertCreator;
 import hu.undieb.kg.socotra.util.StringConstants;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
@@ -147,22 +150,15 @@ public class NewGameController {
     private GameInitializer gameInitializer;
     private ServerDAO serverDAO;
 
-    public NewGameController(SocotraApp mainApp, boolean multiplayer) {
-        this.mainApp = mainApp;
-        if (multiplayer == false) {
-            serverDAO = null;
-        } else {
-            serverDAO = new ServerDAOImpl();
-        }
-        gameInitializer = new GameInitializer();
-        remotePlayers = 0;
-        this.multiplayer = multiplayer;
+    public NewGameController(SocotraApp mainApp, InputStreamReader inputStream, boolean multiplayer) throws IOException {
+        this(mainApp, inputStream, multiplayer, multiplayer ? null : new ServerDAOImpl());
     }
 
-    public NewGameController(SocotraApp mainApp, boolean multiplayer, ServerDAO serverDAO) {
+    public NewGameController(SocotraApp mainApp, InputStreamReader inputStream, boolean multiplayer, ServerDAO serverDAO)
+            throws IOException {
         this.mainApp = mainApp;
         this.serverDAO = serverDAO;
-        gameInitializer = new GameInitializer();
+        gameInitializer = new GameInitializer(inputStream);
         remotePlayers = 0;
         this.multiplayer = multiplayer;
     }
@@ -231,11 +227,12 @@ public class NewGameController {
     @FXML
     private void removePlayerPressed() {
         AddedPlayer selectedPlayer = (AddedPlayer) playersTable.getSelectionModel().getSelectedItem();
-        int selectedPlayerIndex = playersTable.getSelectionModel().getSelectedIndex();
-        playersTable.getItems().remove(selectedPlayer);
-        gameInitializer.removePlayerSlot(selectedPlayerIndex);
-        if (selectedPlayer != null && selectedPlayer.getType().equals(StringConstants.REMOTE_PLAYER)) {
-            remotePlayers--;
+        if (selectedPlayer != null) {
+            playersTable.getItems().remove(selectedPlayer);
+            gameInitializer.removePlayer(selectedPlayer.getName());
+            if (selectedPlayer.getType().equals(StringConstants.REMOTE_PLAYER)) {
+                remotePlayers--;
+            }
         }
         forwardButton.setDisable(tableData.size() < MIN_NUM_OF_PLAYERS);
         addPlayerButton.setDisable(false);
@@ -292,13 +289,13 @@ public class NewGameController {
                             playerType = PlayerEntity.PlayerType.HUMAN;
                     }
                     if (p.isDefined()) {
-                        players.add(new PlayerEntity(0, null, p.getName(), playerType, 
+                        players.add(new PlayerEntity(0, null, p.getName(), playerType,
                                 !p.getType().equals(StringConstants.REMOTE_PLAYER), p.getPassword()));
                     }
                 }
                 int availablePlaces = (int) tableData.stream().filter(p -> !p.isDefined()).count();
                 ServerEntity serverEntity = new ServerEntity(0, serverName, externalIp, port,
-                        ServerEntity.ServerState.LOBBY, thinkingTime, timeExtensions, 
+                        ServerEntity.ServerState.LOBBY, thinkingTime, timeExtensions,
                         privateServerCheckBox.isSelected(), availablePlaces, players);
                 players.forEach(p -> p.setServer(serverEntity));
                 serverDAO.createServer(serverEntity);
@@ -327,13 +324,13 @@ public class NewGameController {
             tableData.add(new AddedPlayer(playerName.trim(), playerType, password, defined));
             switch (playerType) {
                 case StringConstants.LOCAL_PLAYER:
-                    gameInitializer.addPlayerSlot(playerName, GameInitializer.PlayerType.HUMAN);
+                    gameInitializer.addPlayer(playerName, Player.PlayerType.HUMAN);
                     break;
                 case StringConstants.REMOTE_PLAYER:
-                    gameInitializer.addPlayerSlot(playerName, GameInitializer.PlayerType.REMOTE);
+                    gameInitializer.addPlayer(playerName, Player.PlayerType.REMOTE);
                     break;
                 case StringConstants.COMPUTER:
-                    gameInitializer.addPlayerSlot(playerName, GameInitializer.PlayerType.COMPUTER);
+                    gameInitializer.addPlayer(playerName, Player.PlayerType.COMPUTER);
                     break;
             }
         }

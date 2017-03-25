@@ -26,6 +26,7 @@ import hu.undieb.kg.socotra.model.persistence.ServerEntity;
 import hu.undieb.kg.socotra.util.AlertCreator;
 import hu.undieb.kg.socotra.util.StringConstants;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -144,10 +145,11 @@ public class JoinServerController {
     private ServerDAO serverDAO;
     private GameInitializer gameInitializer;
 
-    public JoinServerController(SocotraApp mainApp, ServerDAO serverDAO) {
+    public JoinServerController(SocotraApp mainApp, InputStreamReader inputStream, ServerDAO serverDAO) 
+            throws IOException {
         this.mainApp = mainApp;
         this.serverDAO = serverDAO;
-        this.gameInitializer = new GameInitializer();
+        this.gameInitializer = new GameInitializer(inputStream);
     }
 
     @FXML

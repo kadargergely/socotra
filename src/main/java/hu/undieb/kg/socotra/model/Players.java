@@ -17,6 +17,7 @@
  */
 package hu.undieb.kg.socotra.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,14 +26,18 @@ import java.util.stream.Collectors;
  * @author Gergely Kadar
  */
 public class Players {
-    
+
     private List<Player> players;
     private int currentPlayer = 0;
-    
+
     public Players(List<Player> players) {
         this.players = players;
     }
-    
+
+    public Players() {
+        this(new ArrayList<>());
+    }
+
     public Player getPlayerByName(String playerName) {
         for (Player p : players) {
             if (p.getName().equals(playerName)) {
@@ -41,24 +46,41 @@ public class Players {
         }
         return null;
     }
-    
+
+    public void add(Player player) {
+        players.add(player);
+    }
+
+    public void remove(String playerName) {
+        for (Player player : players) {
+            if (player.getName().equals(playerName)) {
+                players.remove(player);
+                break;
+            }
+        }
+    }
+
     public Player getCurrentPlayer() {
         return players.get(currentPlayer);
     }
-    
+
     public void next() {
         currentPlayer = (currentPlayer + 1) % players.size();
     }
-    
+
     public int getNumOfPlayers() {
         return players.size();
     }
-    
+
     public List<String> getPlayerNames() {
         return players.stream().map(p -> p.getName()).collect(Collectors.toList());
     }
-    
+
     public List<Integer> getPlayerScores() {
         return players.stream().map(p -> p.getScore()).collect(Collectors.toList());
+    }
+
+    public List<Player> getPlayers() {
+        return players;
     }
 }

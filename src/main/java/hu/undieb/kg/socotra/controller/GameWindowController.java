@@ -19,7 +19,6 @@ package hu.undieb.kg.socotra.controller;
 
 import hu.undieb.kg.socotra.model.GameManager;
 import hu.undieb.kg.socotra.model.GameObserver;
-import hu.undieb.kg.socotra.model.LocalHumanPlayer;
 import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.Tile;
 import hu.undieb.kg.socotra.view.GameView;
@@ -38,9 +37,9 @@ public class GameWindowController implements GameView, GameObserver {
     private ButtonsController buttonsCtr;
 
     private GameManager gameManager;
-    private LocalHumanPlayer player;
+    private Player player;
 
-    public GameWindowController(GameManager gameManager, LocalHumanPlayer player) {
+    public GameWindowController(GameManager gameManager, Player player) {
         this.gameManager = gameManager;
         this.player = player;
         

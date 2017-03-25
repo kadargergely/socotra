@@ -19,6 +19,7 @@ package hu.undieb.kg.socotra.controller;
 
 import com.sun.javafx.binding.StringConstant;
 import hu.undieb.kg.socotra.SocotraApp;
+import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.networking.NetworkManager;
 import hu.undieb.kg.socotra.model.persistence.DBConnectionException;
 import hu.undieb.kg.socotra.model.persistence.PlayerEntity;
@@ -65,21 +66,7 @@ public class ChoosePlayerController {
     private ServerEntity serverToConnect;
     private ServerDAO serverDAO;
 
-    private ObservableList<String> choiceBoxItems;
-    private List<String> passwords;
-
-    public ChoosePlayerController(JoinServerController ctr, List<String> choosablePlayers) {
-        this.mainCtr = ctr;
-        this.passwords = passwords;
-        choiceBoxItems = FXCollections.observableArrayList();
-        choiceBoxItems.add(StringConstants.NEW_PLAYER);
-        for (int i = 0; i < choosablePlayers.size(); i++) {
-            if (passwords.get(i) != null) {
-                choosablePlayers.set(i, choosablePlayers.get(i) + "(" + StringConstants.PASSWORD + ")");
-            }
-        }
-        choiceBoxItems.addAll(choosablePlayers);
-    }
+    private ObservableList<String> choiceBoxItems;    
 
     public ChoosePlayerController(SocotraApp mainApp, ServerDAO serverDAO, ServerEntity serverToConnect, GameInitializer gameInitializer) {
         this.mainApp = mainApp;
@@ -100,7 +87,6 @@ public class ChoosePlayerController {
         playerChoiceBox.setItems(choiceBoxItems);
         playerChoiceBox.getSelectionModel().selectFirst();
         playerChoiceBox.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVal, newVal) -> {
-            String oldValue = (String) oldVal;
             String newValue = (String) newVal;
             if (!StringConstants.NEW_PLAYER.equals(newValue)) {
                 playerNameField.setText(newValue);
@@ -131,10 +117,10 @@ public class ChoosePlayerController {
                     password = passwordField.getText();
                 }
                 // add players to the game
-                gameInitializer.addPlayerSlot(playerNameField.getText(), GameInitializer.PlayerType.HUMAN);
+                gameInitializer.addPlayer(playerNameField.getText(), Player.PlayerType.HUMAN);
                 serverToConnect.getPlayers().forEach(p -> {
-                    gameInitializer.addPlayerSlot(p.getName(),
-                            p.getType() == PlayerEntity.PlayerType.HUMAN ? GameInitializer.PlayerType.REMOTE : GameInitializer.PlayerType.COMPUTER);
+                    gameInitializer.addPlayer(p.getName(),
+                            p.getType() == PlayerEntity.PlayerType.HUMAN ? Player.PlayerType.REMOTE : Player.PlayerType.COMPUTER);
                 });
                 serverDAO.addPlayer(serverToConnect,
                         new PlayerEntity(0, serverToConnect, playerNameField.getText(), PlayerEntity.PlayerType.HUMAN, true, password));
@@ -149,15 +135,16 @@ public class ChoosePlayerController {
                     AlertCreator.showErrorMessage(StringConstants.PLAYER_PASSWD_INCORRECT_TITLE, StringConstants.PLAYER_PASSWD_INCORRECT_MSG);
                 }
                 // add players to the game
-                gameInitializer.addPlayerSlot(playerNameField.getText(), GameInitializer.PlayerType.HUMAN);
+                gameInitializer.addPlayer(playerNameField.getText(), Player.PlayerType.HUMAN);
                 for (PlayerEntity player : serverToConnect.getPlayers()) {
                     if (!player.getName().equals(playerNameField.getText())) {
-                        gameInitializer.addPlayerSlot(player.getName(),
-                                player.getType() == PlayerEntity.PlayerType.HUMAN ? GameInitializer.PlayerType.REMOTE : GameInitializer.PlayerType.COMPUTER);
+                        gameInitializer.addPlayer(player.getName(),
+                                player.getType() == PlayerEntity.PlayerType.HUMAN ? Player.PlayerType.REMOTE : Player.PlayerType.COMPUTER);
                     }
                 }
                 serverDAO.connectPlayer(getPlayerEntityByName(playerNameField.getText()));
             }
+            gameInitializer.finalizePlayers();
             // create client endpoint
             gameInitializer.createClient(serverToConnect.getIpAddress(),
                     serverToConnect.getPort() != null ? serverToConnect.getPort() : NetworkManager.DEFAULT_PORT);

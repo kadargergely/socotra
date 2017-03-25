@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Gergely Kadar
  */
-public class GameClient implements GameObserver, GameEndPoint {
+public class GameClient implements GameObserver {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(GameClient.class);
 
@@ -45,11 +45,17 @@ public class GameClient implements GameObserver, GameEndPoint {
 
     private static final int TIMEOUT = 5000;
 
-    public GameClient(String host, int port) throws IOException {
+    public GameClient(String host, int port, GameManager gameManager, Players players) throws IOException {
         client = new Client();
         client.start();
-        gameManager = null;
-//        this.playerName = playerName;
+        this.gameManager = gameManager;
+        this.players = players;
+        for (Player player : players.getPlayers()) {
+            if (player.getPlayerType() == Player.PlayerType.HUMAN) {
+                playerName = player.getName();
+                break;
+            }
+        }
 
         NetworkManager.register(client);
 
@@ -97,10 +103,5 @@ public class GameClient implements GameObserver, GameEndPoint {
     @Override
     public void turnEnded(GameManager.TurnAction action, Player player) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setGameManager(GameManager gameManager) {
-        this.gameManager = gameManager;
     }
 }

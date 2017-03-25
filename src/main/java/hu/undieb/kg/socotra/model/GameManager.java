@@ -17,12 +17,9 @@
  */
 package hu.undieb.kg.socotra.model;
 
-import hu.undieb.kg.socotra.model.networking.NetworkManager;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import hu.undieb.kg.socotra.view.GameView;
 import java.util.StringJoiner;
 
 /**

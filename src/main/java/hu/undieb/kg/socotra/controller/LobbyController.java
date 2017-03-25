@@ -18,6 +18,7 @@
 package hu.undieb.kg.socotra.controller;
 
 import hu.undieb.kg.socotra.SocotraApp;
+import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.util.StringConstants;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -103,12 +104,12 @@ public class LobbyController {
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         tableData = FXCollections.observableArrayList();
-        playersTable.setItems(tableData);
-
-        for (GameInitializer.PlayerSlot ps : gameInitializer.getPlayerSlots()) {
-            String name = ps.player.getName();
+        playersTable.setItems(tableData);        
+        
+        for (Player player : gameInitializer.getPlayers()) {
+            String name = player.getName();
             String type = "";
-            switch (ps.playerType) {
+            switch (player.getPlayerType()) {
                 case HUMAN:
                     type = StringConstants.LOCAL_PLAYER;
                     break;
@@ -119,7 +120,8 @@ public class LobbyController {
                     type = StringConstants.REMOTE_PLAYER;
                     break;
             }
-            String status = ps.isFree() ? StringConstants.WAITING_FOR_PLAYER : StringConstants.CONNECTED;
+            String status = player.getPlayerType() == Player.PlayerType.REMOTE ? 
+                    StringConstants.WAITING_FOR_PLAYER : StringConstants.CONNECTED;
             tableData.add(new PlayerInGame(name, type, status));
         }
     }

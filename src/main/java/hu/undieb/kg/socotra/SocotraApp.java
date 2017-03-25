@@ -70,7 +70,9 @@ public class SocotraApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        showJoinServerWindow(new JoinServerController(this, new ServerDAOImpl()));
+        String dictFile = "/hu_HU.dic";
+        InputStreamReader inputStream = new InputStreamReader(SocotraApp.class.getResourceAsStream(dictFile), "UTF-8");
+        showJoinServerWindow(new JoinServerController(this, inputStream, new ServerDAOImpl()));
         // showGameWindow(GameWindowController.WindowType.MULTIPLAYER);
         // showTestWindow();
 
@@ -263,9 +265,10 @@ public class SocotraApp extends Application {
         }
     }
 
-    public void showNewGameWindow(boolean multiplayer) {
+    public void showNewGameWindow(NewGameController ctr) {
         try {
-            AnchorPane rootPane = (AnchorPane) loadNode("/fxmls/NewGame.fxml", new NewGameController(this, multiplayer));
+            
+            AnchorPane rootPane = (AnchorPane) loadNode("/fxmls/NewGame.fxml", ctr);
             Scene scene = new Scene(rootPane);
             primaryStage.setScene(scene);
             primaryStage.setTitle("Socotra");

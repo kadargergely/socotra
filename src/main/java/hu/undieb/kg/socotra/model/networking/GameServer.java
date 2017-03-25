@@ -31,7 +31,7 @@ import java.io.IOException;
  *
  * @author Gergely Kadar
  */
-public class GameServer implements GameObserver, GameEndPoint {
+public class GameServer implements GameObserver {
 
     private Server server;
     private GameManager gameManager;
@@ -43,7 +43,7 @@ public class GameServer implements GameObserver, GameEndPoint {
         public String PLAYER_NAME;
     }
 
-    public GameServer(int port, LobbyController lobbyController) throws IOException {
+    public GameServer(int port, LobbyController lobbyController, GameManager gameManager, Players players) throws IOException {
         server = new Server() {
             @Override
             protected Connection newConnection() {
@@ -51,6 +51,8 @@ public class GameServer implements GameObserver, GameEndPoint {
             }
         };
         server = new Server();
+        this.gameManager = gameManager;
+        this.players = players;
 //        this.gameManager = gameManager;
 //        this.players = players;
 
@@ -130,11 +132,6 @@ public class GameServer implements GameObserver, GameEndPoint {
         server.sendToAllTCP(gameStarted);
     }
     
-    @Override
-    public void setGameManager(GameManager gameManager) {
-        this.gameManager = gameManager;
-    }
-
     void sendToAllExceptPlayer(String playerName, Object object) {
         Connection[] connections = server.getConnections();
         Connection excludedConn = null;
