@@ -20,19 +20,21 @@ package hu.undieb.kg.socotra.controller;
 import hu.undieb.kg.socotra.SocotraApp;
 import hu.undieb.kg.socotra.model.networking.NetworkManager;
 import hu.undieb.kg.socotra.model.networking.NetworkUtils;
+import hu.undieb.kg.socotra.model.persistence.DBConnectionException;
+import hu.undieb.kg.socotra.model.persistence.ExistingServerNameException;
+import hu.undieb.kg.socotra.model.persistence.PlayerEntity;
+import hu.undieb.kg.socotra.model.persistence.ServerDAO;
 import hu.undieb.kg.socotra.model.persistence.ServerDAOImpl;
 import hu.undieb.kg.socotra.model.persistence.ServerEntity;
 import hu.undieb.kg.socotra.util.AlertCreator;
 import hu.undieb.kg.socotra.util.StringConstants;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -83,10 +85,26 @@ public class NewGameController {
 
         private final SimpleStringProperty NAME;
         private final SimpleStringProperty TYPE;
+        private final String PASSWORD;
+        private final boolean DEFINED;
 
-        public AddedPlayer(String name, String type) {
+        public AddedPlayer(String name, String type, String password, boolean defined) {
             this.NAME = new SimpleStringProperty(name);
             this.TYPE = new SimpleStringProperty(type);
+            this.PASSWORD = password;
+            this.DEFINED = defined;
+        }
+
+        public AddedPlayer(String name, String type, boolean defined) {
+            this(name, type, null, defined);
+        }
+
+        public AddedPlayer(String name, String type, String password) {
+            this(name, type, password, true);
+        }
+
+        public AddedPlayer(String name, String type) {
+            this(name, type, null, true);
         }
 
         public String getName() {
@@ -96,6 +114,15 @@ public class NewGameController {
         public String getType() {
             return TYPE.get();
         }
+
+        public String getPassword() {
+            return PASSWORD;
+        }
+
+        public boolean isDefined() {
+            return DEFINED;
+        }
+
     }
 
     public class AddPlayerException extends Exception {
@@ -118,12 +145,26 @@ public class NewGameController {
 
     private SocotraApp mainApp;
     private GameInitializer gameInitializer;
+    private ServerDAO serverDAO;
 
     public NewGameController(SocotraApp mainApp, boolean multiplayer) {
         this.mainApp = mainApp;
-        gameInitializer = new GameInitializer(new ServerDAOImpl());
+        if (multiplayer == false) {
+            serverDAO = null;
+        } else {
+            serverDAO = new ServerDAOImpl();
+        }
+        gameInitializer = new GameInitializer();
         remotePlayers = 0;
-        this.multiplayer = multiplayer;        
+        this.multiplayer = multiplayer;
+    }
+
+    public NewGameController(SocotraApp mainApp, boolean multiplayer, ServerDAO serverDAO) {
+        this.mainApp = mainApp;
+        this.serverDAO = serverDAO;
+        gameInitializer = new GameInitializer();
+        remotePlayers = 0;
+        this.multiplayer = multiplayer;
     }
 
     @FXML
@@ -133,7 +174,7 @@ public class NewGameController {
 
         tableData = FXCollections.observableArrayList();
         playersTable.setItems(tableData);
-        
+
         if (!multiplayer) {
             serverSettingsPane.setDisable(true);
         } else {
@@ -148,7 +189,7 @@ public class NewGameController {
                 removePlayerButton.setDisable(true);
             }
         });
-        
+
         timeField.setDisable(!limitedTimeCheckBox.isSelected());
         timeExtensionsField.setDisable(!limitedTimeCheckBox.isSelected());
 
@@ -166,10 +207,10 @@ public class NewGameController {
     }
 
     @FXML
-    private void limitedTimePressed() {       
+    private void limitedTimePressed() {
         timeField.setDisable(!limitedTimeCheckBox.isSelected());
         timeExtensionsField.setDisable(!limitedTimeCheckBox.isSelected());
-        if (!limitedTimeCheckBox.isSelected()) {            
+        if (!limitedTimeCheckBox.isSelected()) {
             timeField.clear();
             timeExtensionsField.clear();
         } else {
@@ -207,7 +248,7 @@ public class NewGameController {
                 // validate server name
                 String serverName = serverNameField.getText();
                 if (serverName == null || serverName.trim().equals("")) {
-                    AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_NAME_TITLE, 
+                    AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_NAME_TITLE,
                             StringConstants.INVALID_SERVER_NAME_MSG);
                     return;
                 }
@@ -217,7 +258,7 @@ public class NewGameController {
                 if (!(portFieldText == null || portFieldText.trim().equals(""))) {
                     port = Integer.valueOf(portFieldText);
                 } else {
-                    AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_PORT_TITLE, 
+                    AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_PORT_TITLE,
                             StringConstants.INVALID_SERVER_PORT_MSG);
                     return;
                 }
@@ -227,9 +268,9 @@ public class NewGameController {
                 String timeFieldText = timeField.getText();
                 String timeExtensionsFieldText = timeExtensionsField.getText();
                 if (limitedTimeCheckBox.isSelected()) {
-                    if (timeFieldText == null || timeExtensionsFieldText == null 
+                    if (timeFieldText == null || timeExtensionsFieldText == null
                             || timeFieldText.trim().equals("") || timeExtensionsFieldText.trim().equals("")) {
-                        AlertCreator.showErrorMessage(StringConstants.INVALID_TIMER_PROP_TITLE, 
+                        AlertCreator.showErrorMessage(StringConstants.INVALID_TIMER_PROP_TITLE,
                                 StringConstants.INVALID_TIMER_PROP_MSG);
                         return;
                     } else {
@@ -237,21 +278,45 @@ public class NewGameController {
                         timeExtensions = Integer.valueOf(timeExtensionsFieldText);
                     }
                 }
-                
+                // get external IP address
                 String externalIp = NetworkUtils.getExternalIpAddress();
-                
+                // create server on database
+                List<PlayerEntity> players = new ArrayList<>();
+                for (AddedPlayer p : tableData) {
+                    PlayerEntity.PlayerType playerType;
+                    switch (p.getType()) {
+                        case StringConstants.COMPUTER:
+                            playerType = PlayerEntity.PlayerType.COMPUTER;
+                            break;
+                        default:
+                            playerType = PlayerEntity.PlayerType.HUMAN;
+                    }
+                    if (p.isDefined()) {
+                        players.add(new PlayerEntity(0, null, p.getName(), playerType, 
+                                !p.getType().equals(StringConstants.REMOTE_PLAYER), p.getPassword()));
+                    }
+                }
+                int availablePlaces = (int) tableData.stream().filter(p -> !p.isDefined()).count();
+                ServerEntity serverEntity = new ServerEntity(0, serverName, externalIp, port,
+                        ServerEntity.ServerState.LOBBY, thinkingTime, timeExtensions, 
+                        privateServerCheckBox.isSelected(), availablePlaces, players);
+                players.forEach(p -> p.setServer(serverEntity));
+                serverDAO.createServer(serverEntity);
+                // create the server endpoint and jump to the lobby
                 LobbyController lobbyController = new LobbyController(gameInitializer);
-                ServerEntity serverEntity = new ServerEntity(0, serverName, externalIp, port, 
-                        ServerEntity.ServerState.LOBBY, thinkingTime, timeExtensions, privateServerCheckBox.isSelected());
                 gameInitializer.createServer(NetworkManager.DEFAULT_PORT, lobbyController);
                 mainApp.showLobbyWindow(lobbyController);
             } catch (IOException ex) {
                 AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, ex.getMessage());
+            } catch (DBConnectionException ex) {
+                AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.DB_UNREACHABLE_MSG);
+            } catch (ExistingServerNameException ex) {
+                AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.EXISTING_SERVER_NAME_MSG);
             }
         }
     }
 
-    public void addPlayer(String playerType, String playerName) throws AddPlayerException {
+    public void addPlayer(String playerType, String playerName, String password, boolean defined) throws AddPlayerException {
         boolean nameExists = tableData.stream()
                 .map(p -> p.getName())
                 .filter(n -> n.toLowerCase().equals(playerName.trim().toLowerCase()))
@@ -259,7 +324,7 @@ public class NewGameController {
         if (nameExists) {
             throw new AddPlayerException(StringConstants.ENTER_NEW_NAME);
         } else {
-            tableData.add(new AddedPlayer(playerName.trim(), playerType));
+            tableData.add(new AddedPlayer(playerName.trim(), playerType, password, defined));
             switch (playerType) {
                 case StringConstants.LOCAL_PLAYER:
                     gameInitializer.addPlayerSlot(playerName, GameInitializer.PlayerType.HUMAN);
@@ -279,6 +344,18 @@ public class NewGameController {
         if (playerType.equals(StringConstants.REMOTE_PLAYER)) {
             remotePlayers++;
         }
+    }
+
+    public void addPlayer(String playerType, String playerName, String password) throws AddPlayerException {
+        addPlayer(playerType, playerName, password, true);
+    }
+
+    public void addPlayer(String playerType, String playerName, boolean defined) throws AddPlayerException {
+        addPlayer(playerType, playerName, null, defined);
+    }
+
+    public void addPlayer(String playerType, String playerName) throws AddPlayerException {
+        addPlayer(playerType, playerName, null);
     }
 
     public int getRemotePlayerCount() {

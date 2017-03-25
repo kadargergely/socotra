@@ -18,12 +18,7 @@
 package hu.undieb.kg.socotra.controller;
 
 import hu.undieb.kg.socotra.SocotraApp;
-import hu.undieb.kg.socotra.model.GameManager;
-import hu.undieb.kg.socotra.model.Player;
-import hu.undieb.kg.socotra.model.networking.GameServer;
 import hu.undieb.kg.socotra.util.StringConstants;
-import java.util.List;
-import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

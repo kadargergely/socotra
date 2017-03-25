@@ -28,6 +28,7 @@ public class StringConstants {
 
     public static final String LOCAL_PLAYER = "Helyi játékos";
     public static final String COMPUTER = "Számítógép";
+    public static final String HUMAN = "Ember";
     public static final String REMOTE_PLAYER = "Távoli játékos";
     public static final String INVALID_NAME = "Hibás név";
     public static final String ENTER_VALID_NAME = "Kérlek, adj meg egy megfelelő nevet!";
@@ -37,11 +38,29 @@ public class StringConstants {
     public static final String WAITING_FOR_PLAYER = "Várakozás a játékosra...";
     public static final String SERVER_CREATION_FAILED_TITLE = "Szerver létrehozási hiba";
     public static final String SERVER_CREATION_FAILED_MSG = "Szerver létrehozása nem sikerült. Próbálkozz másik porttal!";
+    public static final String DB_UNREACHABLE_MSG = "Nem sikerült elérni az adatbázist.";
     public static final String INVALID_SERVER_NAME_TITLE = "Nem megfelelő szerver név";
     public static final String INVALID_SERVER_NAME_MSG = "Kérlek, adj meg egy megfelelő szerver nevet!";
+    public static final String EXISTING_SERVER_NAME_MSG = "Már létezik ilyen nevű szerver. Kérlek, adj meg egy másik nevet!";
     public static final String FAILED_TO_GET_EXTERNAL_IP = "Nem sikerült lekérdezni a külső IP címet. Próbálkozz később!";
     public static final String INVALID_TIMER_PROP_TITLE = "Nem megfelelő időkorlát beállítások";
     public static final String INVALID_TIMER_PROP_MSG = "Kérlek, adj meg megfelelő értékeket a gondolkodási idővel kapcsolatos beállításokhoz!";
     public static final String INVALID_SERVER_PORT_TITLE = "Nem megfelelő szerver port";
     public static final String INVALID_SERVER_PORT_MSG = "Kérlek, adj meg megfelelő értéket a szerver portnak!";
+    public static final String FAILED_TO_GET_SERVERS_TITLE = "A szerverek listája nem elérhető";
+    public static final String FAILED_TO_GET_SERVERS_MSG = "Nem sikerült lekérdezni a szerverek listáját. Az adatbázis nem elérhető.";
+    public static final String SERVER_PLAYER_STATUS_CONNECTED = "Csatlakozva";
+    public static final String SERVER_PLAYER_STATUS_FREE = "Szabad";
+    public static final String ADD_SERVER_TITLE = "Szerver hozzáadása";
+    public static final String ADD_SERVER_TEXT = "Szerver IP címe";
+    public static final String NO_SERVERS_AT_IP_TITLE = "Nem található szerver";
+    public static final String NO_SERVERS_AT_IP_MSG = "Nem található elérhető szerver a megadott IP címen.";
+    public static final String NEW_PLAYER = "Új játékos";
+    public static final String PASSWORD = "jelszó";
+    public static final String FAILED_TO_JOIN_SERVER_TITLE = "Szerver csatlakozási hiba";
+    public static final String FAILED_TO_JOIN_SERVER_MSG = "Nem sikerült csatlakozni a szerverhez. A szerver nem elérhető.";
+    public static final String PLAYER_PASSWD_INCORRECT_TITLE = "Hibás jelszó";
+    public static final String PLAYER_PASSWD_INCORRECT_MSG = "A csatlakozáshoz meg kell adni a kiválasztott játékoshoz tartozó jelszót.";
+    public static final String CANT_JOIN_SERVER_TITLE = "Nem lehet csatlakozni a szerverhez"; 
+    public static final String CANT_JOIN_SERVER_MSG = "Sajnos már nem lehet csatlakozni ehhez a szerverhez. Már elindult a játék, vagy nincs több hely.";
 }

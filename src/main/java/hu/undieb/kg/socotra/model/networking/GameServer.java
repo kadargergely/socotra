@@ -26,7 +26,6 @@ import hu.undieb.kg.socotra.model.GameObserver;
 import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.Players;
 import java.io.IOException;
-import java.util.List;
 
 /**
  *
@@ -136,7 +135,7 @@ public class GameServer implements GameObserver, GameEndPoint {
         this.gameManager = gameManager;
     }
 
-    private void sendToAllExceptPlayer(String playerName, Object object) {
+    void sendToAllExceptPlayer(String playerName, Object object) {
         Connection[] connections = server.getConnections();
         Connection excludedConn = null;
         for (Connection c : connections) {
@@ -147,6 +146,8 @@ public class GameServer implements GameObserver, GameEndPoint {
         }
         if (excludedConn != null) {
             server.sendToAllExceptTCP(excludedConn.getID(), object);
+        } else {
+            server.sendToAllTCP(object);
         }
     }
 }

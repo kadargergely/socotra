@@ -18,8 +18,9 @@
 package hu.undieb.kg.socotra;
 
 import hu.undieb.kg.socotra.controller.AddPlayerController;
-import hu.undieb.kg.socotra.controller.GameInitializer;
+import hu.undieb.kg.socotra.controller.ChoosePlayerController;
 import hu.undieb.kg.socotra.controller.GameWindowController;
+import hu.undieb.kg.socotra.controller.JoinServerController;
 import hu.undieb.kg.socotra.controller.LobbyController;
 import hu.undieb.kg.socotra.controller.LoginController;
 import javafx.application.Application;
@@ -29,13 +30,12 @@ import hu.undieb.kg.socotra.controller.MiddleGridPaneController;
 import hu.undieb.kg.socotra.controller.RegisterController;
 import hu.undieb.kg.socotra.controller.TestWindowController;
 import hu.undieb.kg.socotra.controller.NewGameController;
-import hu.undieb.kg.socotra.model.GameManager;
+import hu.undieb.kg.socotra.model.persistence.ServerDAOImpl;
 import hu.undieb.kg.socotra.view.ResizableCanvas;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -70,7 +70,7 @@ public class SocotraApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        showNewGameWindow(true);
+        showJoinServerWindow(new JoinServerController(this, new ServerDAOImpl()));
         // showGameWindow(GameWindowController.WindowType.MULTIPLAYER);
         // showTestWindow();
 
@@ -291,6 +291,21 @@ public class SocotraApp extends Application {
             LOGGER.error(e.getMessage(), e);
         }
     }
+    
+    public void showChoosePlayerWindow(ChoosePlayerController choosePlayerController) {
+        try {
+            AnchorPane pane = (AnchorPane) loadNode("/fxmls/ChoosePlayer.fxml", choosePlayerController);
+            Scene scene = new Scene(pane);
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(primaryStage);
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
 
     public void showLobbyWindow(LobbyController ctr) {
         try {
@@ -300,6 +315,20 @@ public class SocotraApp extends Application {
             primaryStage.setTitle("Socotra");
             primaryStage.setMinWidth(600);
             primaryStage.setMinHeight(350);
+            primaryStage.show();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+    
+    public void showJoinServerWindow(JoinServerController ctr) {
+        try {
+            AnchorPane pane = (AnchorPane) loadNode("/fxmls/JoinServer.fxml", ctr);
+            Scene scene = new Scene(pane);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Socotra");
+            primaryStage.setMinWidth(600);
+            primaryStage.setMinHeight(400);
             primaryStage.show();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);

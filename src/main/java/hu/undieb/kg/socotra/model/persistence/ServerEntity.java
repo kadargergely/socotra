@@ -39,41 +39,44 @@ import org.hibernate.annotations.FetchMode;
 @Entity
 @Table(name = "socotra_servers")
 public class ServerEntity {
-    
+
     public enum ServerState {
         LOBBY,
         STARTED,
         CLOSED
     }
-    
+
     @Id
     @Column(name = "server_id")
     @SequenceGenerator(name = "IdGenerator", sequenceName = "socotra_server_id_s", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "IdGenerator")
     private int serverId;
-    
+
     @Column(name = "server_name")
     private String name;
-    
+
     @Column(name = "ip_address")
     private String ipAddress;
-    
+
     @Column(name = "port")
-    private int port;
-    
+    private Integer port;
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "server_state")
+    @Column(name = "state")
     private ServerState serverState;
-    
+
     @Column(name = "thinking_time")
     private Integer thinkingTime;
-    
+
     @Column(name = "time_extensions")
     private Integer timeExtensions;
-    
-    @Column(name = "private")
+
+    @Column(name = "private_flag")
     private Boolean privateServer;
-    
+
+    @Column(name = "available_places")
+    private int availablePlaces;
+
     @OneToMany(mappedBy = "server", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.JOIN)
     private List<PlayerEntity> players;
@@ -81,7 +84,8 @@ public class ServerEntity {
     public ServerEntity() {
     }
 
-    public ServerEntity(int serverId, String name, String ipAddress, int port, ServerState state, Integer thinkingTime, Integer timeExtensions, Boolean privateServer) {
+    public ServerEntity(int serverId, String name, String ipAddress, Integer port, ServerState state, Integer thinkingTime,
+            Integer timeExtensions, Boolean privateServer, int availablePlaces, List<PlayerEntity> players) {
         this.serverId = serverId;
         this.name = name;
         this.ipAddress = ipAddress;
@@ -90,6 +94,8 @@ public class ServerEntity {
         this.thinkingTime = thinkingTime;
         this.timeExtensions = timeExtensions;
         this.privateServer = privateServer;
+        this.availablePlaces = availablePlaces;
+        this.players = players;
     }
 
     public int getServerId() {
@@ -116,11 +122,11 @@ public class ServerEntity {
         this.ipAddress = ipAddress;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -156,6 +162,14 @@ public class ServerEntity {
         this.privateServer = privateServer;
     }
 
+    public int getAvailablePlaces() {
+        return availablePlaces;
+    }
+
+    public void setAvailablePlaces(int availablePlaces) {
+        this.availablePlaces = availablePlaces;
+    }
+
     public List<PlayerEntity> getPlayers() {
         return players;
     }
@@ -163,6 +177,5 @@ public class ServerEntity {
     public void setPlayers(List<PlayerEntity> players) {
         this.players = players;
     }
-    
-    
+
 }

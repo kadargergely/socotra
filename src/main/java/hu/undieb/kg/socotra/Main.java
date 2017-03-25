@@ -17,6 +17,8 @@
  */
 package hu.undieb.kg.socotra;
 
+import hu.undieb.kg.socotra.model.persistence.DBConnection;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,9 @@ public class Main {
             LOGGER.info("Starting GUI...");
             SocotraApp.runApp(args);
             LOGGER.info("GUI exited.");
+//            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+//            threadSet.forEach(t -> System.out.println(t.getName()));
+            DBConnection.close();
         }
     }
 }

@@ -31,12 +31,12 @@
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Button fx:id="playerCancelButton" layoutX="133.0" layoutY="96.0" mnemonicParsing="false" onAction="#cancelPressed" prefWidth="80.0" text="Mégse" GridPane.columnIndex="1">
+                  <Button fx:id="cancelButton" layoutX="133.0" layoutY="96.0" mnemonicParsing="false" onAction="#cancelPressed" prefWidth="80.0" text="Mégse" GridPane.columnIndex="1">
                      <GridPane.margin>
                         <Insets left="5.0" />
                      </GridPane.margin>
                   </Button>
-                  <Button fx:id="playerOKButton" layoutX="81.0" layoutY="96.0" mnemonicParsing="false" onAction="#okPressed" prefWidth="80.0" text="OK">
+                  <Button fx:id="okButton" layoutX="81.0" layoutY="96.0" mnemonicParsing="false" onAction="#okPressed" prefWidth="80.0" text="OK">
                      <GridPane.margin>
                         <Insets right="5.0" />
                      </GridPane.margin>
@@ -54,9 +54,9 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label text="Típus" />
+                  <Label text="Játékos" />
                   <Label text="Név" GridPane.rowIndex="1" />
-                  <ChoiceBox fx:id="playerTypeChoiceBox" prefHeight="25.0" prefWidth="240.0" GridPane.columnIndex="1" />
+                  <ChoiceBox fx:id="playerChoiceBox" prefHeight="25.0" prefWidth="240.0" GridPane.columnIndex="1" />
                   <TextField fx:id="playerNameField" onKeyPressed="#nameFieldKeyPressed" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label fx:id="passwordLabel" text="Jelszó" GridPane.rowIndex="2" />
                   <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" />

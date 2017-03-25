@@ -1,0 +1,2 @@
+CREATE SEQUENCE socotra_server_id_s;
+CREATE SEQUENCE socotra_player_id_s;

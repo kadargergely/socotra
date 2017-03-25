@@ -17,22 +17,37 @@
  */
 package hu.undieb.kg.socotra.util;
 
+import java.util.Optional;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TextInputDialog;
 
 /**
  *
  * @author Gergely Kadar
  */
 public class AlertCreator {
-    
-    private AlertCreator() {        
+
+    private AlertCreator() {
     }
-    
+
     public static void showErrorMessage(String title, String text) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(text);
         alert.showAndWait();
+    }
+
+    public static String showInputDialog(String title, String text) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(title);
+        dialog.setHeaderText(null);
+        dialog.setContentText(text);
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            return null;
+        }
     }
 }

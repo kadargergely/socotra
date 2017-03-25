@@ -72,13 +72,11 @@ public class GameInitializer {
     private List<PlayerSlot> playerSlots;
     private List<GameObserver> observers;
     private GameEndPoint gameEndPoint;
-    private ServerDAO serverDAO;
 
-    public GameInitializer(ServerDAO serverDAO) {
+    public GameInitializer() {
         playerSlots = new ArrayList<>();
         observers = new ArrayList<>();
         gameEndPoint = null;
-        this.serverDAO = serverDAO;
     }
 
 //    public static GameWindowController initGame(InputStreamReader inputStream, List<String> playerNames, List<PlayerType> playerTypes)

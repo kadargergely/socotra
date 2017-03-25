@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane layoutX="14.0" layoutY="6.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <columnConstraints>
@@ -147,9 +151,9 @@
                         <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                        <Button fx:id="refreshButton" layoutX="14.0" layoutY="249.0" mnemonicParsing="false" prefWidth="80.0" text="Frissítés" GridPane.columnIndex="1" />
-                        <Button fx:id="connectButton" layoutX="162.0" layoutY="249.0" mnemonicParsing="false" prefWidth="80.0" text="Csatlakozás" GridPane.columnIndex="3" />
-                        <Button fx:id="addServerButton" layoutX="88.0" layoutY="249.0" mnemonicParsing="false" prefWidth="80.0" text="Hozzáadás" GridPane.columnIndex="2" />
+                        <Button fx:id="refreshButton" layoutX="14.0" layoutY="249.0" mnemonicParsing="false" onAction="#refreshButtonPressed" prefWidth="80.0" text="Frissítés" GridPane.columnIndex="1" />
+                        <Button fx:id="connectButton" layoutX="162.0" layoutY="249.0" mnemonicParsing="false" onAction="#connectButtonPressed" prefWidth="80.0" text="Csatlakozás" GridPane.columnIndex="3" />
+                        <Button fx:id="addServerButton" layoutX="88.0" layoutY="249.0" mnemonicParsing="false" onAction="#addServerButtonPressed" prefWidth="80.0" text="Hozzáadás" GridPane.columnIndex="2" />
                      </children>
                   </GridPane>
                   <TableView fx:id="availableServersTable" layoutX="14.0" layoutY="38.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">

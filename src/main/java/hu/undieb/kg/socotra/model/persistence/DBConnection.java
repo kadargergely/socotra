@@ -17,6 +17,8 @@
  */
 package hu.undieb.kg.socotra.model.persistence;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -33,19 +35,31 @@ public class DBConnection {
     private static final Logger LOGGER = LoggerFactory.getLogger(DBConnection.class);
     
     private static EntityManagerFactory entityManagerFactory;
+    private static List<EntityManager> entityManagers = new ArrayList<>();
 
     static EntityManager getEntityManager() throws PersistenceException {
         if (entityManagerFactory == null) {
             entityManagerFactory = Persistence.createEntityManagerFactory("db");
             LOGGER.info("Database connection opened.");
         }
-        return entityManagerFactory.createEntityManager();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();        
+        entityManagers.add(entityManager);
+        return entityManager;
     }
 
     public static void close() {
-        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-            entityManagerFactory.close();
-            LOGGER.info("Database connection closed.");
+        try {
+            entityManagers.stream().filter(em -> em.isOpen()).forEach(em -> em.close());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to close open entityManagers.", e);
+        }
+        try {
+            if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+                entityManagerFactory.close();
+                LOGGER.info("Database connection closed.");
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to close database connection.", e);
         }
     }
 }

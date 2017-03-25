@@ -27,5 +27,17 @@ public interface ServerDAO {
     
     public List<ServerEntity> getAvailableServers() throws DBConnectionException;
     
-    public void createServer(ServerEntity server) throws DBConnectionException;
+    public void createServer(ServerEntity server) throws DBConnectionException, ExistingServerNameException;
+    
+    public List<ServerEntity> getServersByIp(String ipAddress) throws DBConnectionException;
+    
+    public ServerEntity getServerByName(String name) throws DBConnectionException;
+    
+    public void incrementAvailablePlaces(ServerEntity server) throws DBConnectionException;
+    
+    public void decrementAvailablePlaces(ServerEntity server) throws DBConnectionException;
+    
+    public void addPlayer(ServerEntity server, PlayerEntity player) throws DBConnectionException;    
+    
+    public void connectPlayer(PlayerEntity player) throws DBConnectionException;
 }

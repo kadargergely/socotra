@@ -20,25 +20,31 @@ package hu.undieb.kg.socotra.model.networking;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import hu.undieb.kg.socotra.controller.LobbyController;
 import hu.undieb.kg.socotra.model.GameManager;
 import hu.undieb.kg.socotra.model.GameObserver;
 import hu.undieb.kg.socotra.model.Player;
 import hu.undieb.kg.socotra.model.Players;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Gergely Kadar
  */
 public class GameClient implements GameObserver, GameEndPoint {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameClient.class);
 
     private Client client;
     private GameManager gameManager;
+    private LobbyController lobbyController;
     private String playerName;
     private Players players;
-    
+
     private static final int TIMEOUT = 5000;
-    
+
     public GameClient(String host, int port) throws IOException {
         client = new Client();
         client.start();
@@ -58,10 +64,19 @@ public class GameClient implements GameObserver, GameEndPoint {
             @Override
             public void received(Connection connection, Object object) {
                 Player player = players.getPlayerByName(playerName);
+                
+                if (object instanceof NetworkManager.RegisterPlayer) {
+                    
+                }
             }
         });
-        
-        client.connect(TIMEOUT, host, port);
+
+        try {
+            client.connect(TIMEOUT, host, port);
+        } catch (IOException e) {
+            LOGGER.error("Failed to connect to server at ip address " + host + ":" + port + ".", e);
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -83,7 +98,7 @@ public class GameClient implements GameObserver, GameEndPoint {
     public void turnEnded(GameManager.TurnAction action, Player player) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public void setGameManager(GameManager gameManager) {
         this.gameManager = gameManager;
