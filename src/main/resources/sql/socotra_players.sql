@@ -7,6 +7,7 @@ CREATE TABLE socotra_players (
   ,player_type      VARCHAR2(15)    NOT NULL
   ,connected_flag   NUMBER(1)       NOT NULL
   ,password         VARCHAR2(100)
+  ,loaded_flag      NUMBER(1)
 )
 
 ALTER TABLE socotra_players
