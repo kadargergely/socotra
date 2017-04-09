@@ -17,11 +17,15 @@
  */
 package hu.unideb.kg.socotra.controller;
 
+import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.GameManager;
 import hu.unideb.kg.socotra.model.GameObserver;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.Tile;
+import hu.unideb.kg.socotra.util.AlertCreator;
+import hu.unideb.kg.socotra.util.StringConstants;
 import hu.unideb.kg.socotra.view.GameView;
+import javafx.application.Platform;
 
 /**
  *
@@ -36,17 +40,19 @@ public class GameWindowController implements GameView, GameObserver {
     private CanvasController canvasCtr;
     private ButtonsController buttonsCtr;
 
+    private SocotraApp mainApp;
     private GameManager gameManager;
     private Player player;
 
-    public GameWindowController(GameManager gameManager, Player player) {
+    public GameWindowController(SocotraApp mainApp, GameManager gameManager, Player player) {
+        this.mainApp = mainApp;
         this.gameManager = gameManager;
         this.player = player;
-        
+
         scoreTableCtr = new ScoreTableController(this);
         chatCtr = new ChatController();
         historyCtr = new HistoryController(this);
-        menuBarCtr = new MenuBarController();
+        menuBarCtr = new MenuBarController(this);
         canvasCtr = new CanvasController(this);
         buttonsCtr = new ButtonsController(this);
     }
@@ -62,17 +68,30 @@ public class GameWindowController implements GameView, GameObserver {
     }
 
     @Override
-    public void turnEnded(GameManager.TurnAction action, Player player) {
+    public void turnEnded(GameManager.TurnAction action, Player nextPlayer) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void gameStarted(long bagSeed) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void localPlayerLeft(Player player) {
+
+    }
+
+    @Override
+    public void remotePlayerLeft(Player player) {
+        update();
+    }
+
+    @Override
+    public void serverLeft() {
+        Platform.runLater(() -> {
+            AlertCreator.showErrorMessage(StringConstants.SERVER_UNREACHABLE_TITLE, StringConstants.SERVER_UNREACHABLE_MSG);
+            mainApp.getPrimaryStage().close();
+        });
     }
 
     void mousePressedOnBoard(int row, int col) {
-        gameManager.alterBoard(row, col, player);        
+        gameManager.alterBoard(row, col, player);
     }
 
     void mousePressedOnTray(int index) {
@@ -95,6 +114,11 @@ public class GameWindowController implements GameView, GameObserver {
         if (gameManager.endTurn(GameManager.TurnAction.PASS, player)) {
             update();
         }
+    }
+
+    void handleExitButton() {
+        gameManager.localPlayerLeft(player);
+        mainApp.getPrimaryStage().close();
     }
 
 //    @Override
@@ -155,7 +179,6 @@ public class GameWindowController implements GameView, GameObserver {
 //    public void setPlayer(LocalHumanPlayer player) {
 //        this.player = player;
 //    }
-
     @Override
     public void update() {
         canvasCtr.repaint();

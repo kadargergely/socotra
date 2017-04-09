@@ -37,7 +37,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <main.class>hu.undieb.kg.socotra.Main</main.class>
+        <main.class>hu.unideb.kg.socotra.Main</main.class>
     </properties>
     
     <build>
@@ -161,7 +161,7 @@
             <resource>
                 <targetPath>fxmls</targetPath>
                 <filtering>true</filtering>
-                <directory>${project.basedir}/src/main/java/hu/undieb/kg/socotra/view</directory>
+                <directory>${project.basedir}/src/main/java/hu/unideb/kg/socotra/view</directory>
                 <includes>
                     <include>*.fxml</include>
                 </includes>

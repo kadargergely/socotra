@@ -108,14 +108,14 @@
             </GridPane>
             <GridPane alignment="CENTER" GridPane.rowIndex="1">
                <children>
-                  <Button fx:id="startButton" mnemonicParsing="false" prefHeight="25.0" prefWidth="80.0" text="Start">
-                     <GridPane.margin>
-                        <Insets right="5.0" />
-                     </GridPane.margin>
-                  </Button>
                   <Button fx:id="exitButton" mnemonicParsing="false" onAction="#exitPressed" prefWidth="80.0" text="Kilépés" GridPane.columnIndex="1">
                      <GridPane.margin>
                         <Insets left="5.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Button fx:id="startButton" mnemonicParsing="false" onAction="#startPressed" prefWidth="80.0" text="Start">
+                     <GridPane.margin>
+                        <Insets right="5.0" />
                      </GridPane.margin>
                   </Button>
                </children>

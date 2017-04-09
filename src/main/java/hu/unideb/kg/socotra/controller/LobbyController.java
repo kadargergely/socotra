@@ -20,17 +20,17 @@ package hu.unideb.kg.socotra.controller;
 import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.networking.GameEndPoint;
+import hu.unideb.kg.socotra.model.networking.GameServer;
 import hu.unideb.kg.socotra.model.persistence.DBConnectionException;
 import hu.unideb.kg.socotra.model.persistence.PlayerEntity;
 import hu.unideb.kg.socotra.model.persistence.ServerDAO;
 import hu.unideb.kg.socotra.model.persistence.ServerEntity;
 import hu.unideb.kg.socotra.util.AlertCreator;
 import hu.unideb.kg.socotra.util.StringConstants;
-import java.util.logging.Level;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -38,7 +38,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,13 +119,16 @@ public class LobbyController {
     private ServerDAO serverDAO;
     private ServerEntity serverToConnect;
 
+    private boolean serverLobby;
     private ObservableList<PlayerInGame> tableData;
 
-    public LobbyController(GameInitializer gameInitializer, ServerDAO serverDAO, ServerEntity serverToConnect) {
+    public LobbyController(SocotraApp mainApp, GameInitializer gameInitializer, ServerDAO serverDAO, ServerEntity serverToConnect) {
+        this.mainApp = mainApp;
         this.gameInitializer = gameInitializer;
         this.serverDAO = serverDAO;
         this.serverToConnect = serverToConnect;
         this.endPoint = null;
+        this.serverLobby = false;
     }
 
     @FXML
@@ -156,11 +158,13 @@ public class LobbyController {
                     ? StringConstants.WAITING_FOR_PLAYER : StringConstants.CONNECTED;
             tableData.add(new PlayerInGame(name, type, status));
         }
-        
+
         int loadedPlayers = (int) serverToConnect.getPlayers().stream().filter(p -> p.isLoaded()).count();
         for (int i = 0; i < serverToConnect.getAvailablePlaces() - loadedPlayers; i++) {
             tableData.add(new PlayerInGame("<" + StringConstants.REMOTE_PLAYER + ">", StringConstants.REMOTE_PLAYER, StringConstants.WAITING_FOR_PLAYER));
-        }        
+        }
+
+//        startButton.setDisable(true);
 //        mainApp.getPrimaryStage().setOnCloseRequest((WindowEvent event) -> {
 //            exitPressed();
 //        });
@@ -169,7 +173,36 @@ public class LobbyController {
     @FXML
     private void exitPressed() {
         endPoint.playerLeft();
+        try {
+            if (serverLobby) {
+                serverDAO.setServerStatus(serverToConnect, ServerEntity.ServerState.CLOSED);
+            }
+        } catch (DBConnectionException e) {
+            LOGGER.warn("Failed to set server status to CLOSED.", e);
+        }
         closeWindow();
+    }
+
+    // only the server lobby ever needs to handle this event as the clients can't press the start button
+    @FXML
+    private void startPressed() {        
+        try {
+            serverDAO.setServerStatus(serverToConnect, ServerEntity.ServerState.STARTED);
+            long shuffleSeed = System.currentTimeMillis();
+            // we are confident, that our endPoint is a GameServer
+            ((GameServer) endPoint).startGame(shuffleSeed);
+            startGame(shuffleSeed);
+        } catch (DBConnectionException e) {
+            LOGGER.error("Failed to set server status to STARTED.", e);
+            AlertCreator.showErrorMessage(StringConstants.FAILED_TO_START_GAME_DB_ISSUE_TITLE, StringConstants.FAILED_TO_START_GAME_DB_ISSUE_MSG);
+        }
+    }
+    
+    // common operations for both the server and the client
+    public void startGame(long shuffleSeed) {
+        endPoint.switchToGameListener();
+        gameInitializer.initializeGame(mainApp, shuffleSeed);
+        Platform.runLater(() -> mainApp.showGameWindow(gameInitializer.getGameWindowController(), GameWindowController.WindowType.MULTIPLAYER));        
     }
 
     public void addRemotePlayerToGame(String playerName) {
@@ -187,6 +220,7 @@ public class LobbyController {
                 break;
             }
         }
+        setStartButtonAvailability();
     }
 
     public void removeRemotePlayerFromGame(String playerName) {
@@ -205,6 +239,7 @@ public class LobbyController {
                 break;
             }
         }
+        setStartButtonAvailability();
     }
 
     public void addRemotePlayerToDatabase(String playerName, String password) {
@@ -257,10 +292,20 @@ public class LobbyController {
 
     public void setEndPoint(GameEndPoint endPoint) {
         this.endPoint = endPoint;
+        if (endPoint instanceof GameServer) {
+            this.serverLobby = true;
+        }
     }
 
     private void closeWindow() {
         Stage stage = (Stage) exitButton.getScene().getWindow();
         stage.close();
+    }
+
+    private void setStartButtonAvailability() {
+        if (serverLobby) {
+            boolean allConnected = !tableData.stream().filter(p -> p.getStatus().equals(StringConstants.WAITING_FOR_PLAYER)).findAny().isPresent();
+//            startButton.setDisable(!allConnected);
+        }
     }
 }

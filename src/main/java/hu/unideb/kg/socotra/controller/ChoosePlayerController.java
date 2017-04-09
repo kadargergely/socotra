@@ -17,7 +17,6 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import com.sun.javafx.binding.StringConstant;
 import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.networking.NetworkManager;
@@ -28,7 +27,6 @@ import hu.unideb.kg.socotra.model.persistence.ServerEntity;
 import hu.unideb.kg.socotra.util.AlertCreator;
 import hu.unideb.kg.socotra.util.StringConstants;
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
@@ -142,10 +140,9 @@ public class ChoosePlayerController {
                                 player.getType() == PlayerEntity.PlayerType.HUMAN ? Player.PlayerType.REMOTE : Player.PlayerType.COMPUTER);
                     }
                 }
-            }
-            gameInitializer.finalizePlayers();
+            }            
             // create client endpoint
-            LobbyController lobbyController = new LobbyController(gameInitializer, serverDAO, serverToConnect);            
+            LobbyController lobbyController = new LobbyController(mainApp, gameInitializer, serverDAO, serverToConnect);            
             gameInitializer.createClient(serverToConnect.getIpAddress(),
                     serverToConnect.getPort() != null ? serverToConnect.getPort() : NetworkManager.DEFAULT_PORT, lobbyController);
             mainApp.showLobbyWindow(lobbyController);

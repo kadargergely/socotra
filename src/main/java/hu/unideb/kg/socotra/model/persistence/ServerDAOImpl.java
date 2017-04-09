@@ -213,6 +213,7 @@ public class ServerDAOImpl implements ServerDAO {
         try {
             entityManager = DBConnection.getEntityManager();
             entityManager.getTransaction().begin();
+            player = entityManager.find(PlayerEntity.class, player.getPlayerId());
             player.setConnected(true);
             entityManager.getTransaction().commit();
             LOGGER.info("Player named " + player.getName() + " successfully set to connected status.");
@@ -230,11 +231,30 @@ public class ServerDAOImpl implements ServerDAO {
         try {
             entityManager = DBConnection.getEntityManager();
             entityManager.getTransaction().begin();
+            player = entityManager.find(PlayerEntity.class, player.getPlayerId());
             player.setConnected(false);
             entityManager.getTransaction().commit();
             LOGGER.info("Player named " + player.getName() + " successfully set to disconnected status.");
         } catch (PersistenceException e) {
             LOGGER.warn("Failed to set player named " + player.getName() + " to disconnected status.", e);
+            throw new DBConnectionException();
+        } finally {
+            closeEntityManager(entityManager);
+        }
+    }
+
+    @Override
+    public void setServerStatus(ServerEntity server, ServerEntity.ServerState serverState) throws DBConnectionException {
+        EntityManager entityManager = null;
+        try {
+            entityManager = DBConnection.getEntityManager();
+            entityManager.getTransaction().begin();
+            server = entityManager.find(ServerEntity.class, server.getServerId());
+            server.setServerState(serverState);
+            entityManager.getTransaction().commit();
+            LOGGER.info("Status successfully set for server named " + server.getName() + ".");
+        } catch (PersistenceException e) {
+            LOGGER.warn("Failed to set status for server named " + server.getName() + ".", e);
             throw new DBConnectionException();
         } finally {
             closeEntityManager(entityManager);

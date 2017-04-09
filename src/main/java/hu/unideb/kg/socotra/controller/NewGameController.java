@@ -299,7 +299,7 @@ public class NewGameController {
                 players.forEach(p -> p.setServer(serverEntity));
                 serverDAO.createServer(serverEntity);
                 // create the server endpoint and jump to the lobby
-                LobbyController lobbyController = new LobbyController(gameInitializer, serverDAO, serverEntity);
+                LobbyController lobbyController = new LobbyController(mainApp, gameInitializer, serverDAO, serverEntity);
                 gameInitializer.createServer(NetworkManager.DEFAULT_PORT, lobbyController);                
                 mainApp.showLobbyWindow(lobbyController);
             } catch (IOException ex) {

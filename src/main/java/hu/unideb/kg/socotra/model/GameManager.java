@@ -63,7 +63,6 @@ public class GameManager {
     }
 
     private Players players;
-    private int currentPlayer;
     private boolean boardLegal;
     private boolean movableTiles;
     private boolean wordsCorrect;
@@ -88,6 +87,7 @@ public class GameManager {
         this.players = players;
         bag = new Bag();
         dictionary = new Dictionary(inputStream);
+        playedWords = new ArrayList<>();
     }
 
     public void addObserver(GameObserver observer) {
@@ -99,17 +99,20 @@ public class GameManager {
     }
 
     public void startGame(long bagSeed) {
-//        bagSeed = Double.doubleToLongBits(Math.random());
-        this.bagSeed = bagSeed;
-        bag.shuffle(bagSeed);
-        observers.forEach(o -> o.gameStarted(bagSeed));
-
-        currentPlayer = 0;
         boardLegal = true;
         movableTiles = false;
         wordsCorrect = true;
         turn = 1;
         numOfPasses = 0;
+
+        this.bagSeed = bagSeed;
+        bag.shuffle(bagSeed);
+
+        for (int i = 0; i < Tray.TRAY_SIZE; i++) {
+            for (Player player : players.getPlayersList()) {
+                player.drawTile(bag);
+            }
+        }
     }
 
     /**
@@ -205,7 +208,7 @@ public class GameManager {
 //                p.endOfTurn(action, player);
 //            });
 
-            if (null != action) {
+            if (action != null) {
                 switch (action) {
                     case PLAY:
                         numOfPasses = 0;
@@ -244,6 +247,19 @@ public class GameManager {
             return false;
         }
     }
+    
+    public void localPlayerLeft(Player player) {
+        observers.forEach(o -> o.localPlayerLeft(player));
+    }
+    
+    public void remotePlayerLeft(Player player) {
+        players.remove(player);
+        observers.forEach(o -> o.remotePlayerLeft(player));
+    }
+    
+    public void serverLeft() {
+        observers.forEach(o -> o.serverLeft());
+    }
 
     private boolean gameEnded() {
         return numOfPasses == 2 * players.getNumOfPlayers();
@@ -259,10 +275,6 @@ public class GameManager {
 
     public List<PlayedWord> getPlayedWords() {
         return playedWords;
-    }
-
-    public int getCurrentPlayer() {
-        return currentPlayer;
     }
 
     public boolean isBoardLegal() {

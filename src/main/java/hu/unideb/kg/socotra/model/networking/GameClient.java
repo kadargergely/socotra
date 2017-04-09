@@ -27,7 +27,6 @@ import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.Players;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import javafx.application.Platform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ public class GameClient implements GameObserver, GameEndPoint {
     private GameManager gameManager;
     private LobbyController lobbyController;
     private LobbyListener lobbyListener;
+    private GameListener gameListener;
     private String playerName;
     private Players players;
 
@@ -71,6 +71,9 @@ public class GameClient implements GameObserver, GameEndPoint {
             }
             if (object instanceof NetworkManager.PlayerLeft) {
                 lobbyController.removeRemotePlayerFromGame(((NetworkManager.PlayerLeft) object).PLAYER_NAME);
+            }
+            if (object instanceof NetworkManager.GameStarted) {
+                lobbyController.startGame(((NetworkManager.GameStarted) object).SHUFFLE_SEED);
             }
         }
 
@@ -103,13 +106,32 @@ public class GameClient implements GameObserver, GameEndPoint {
         }
     }
 
+    class GameListener extends Listener {
+
+        @Override
+        public void received(Connection connection, Object object) {
+            if (object instanceof NetworkManager.PlayerLeft) {
+                gameManager.remotePlayerLeft(GameClient.this.players.getPlayerByName(((NetworkManager.PlayerLeft) object).PLAYER_NAME));
+            }
+        }
+
+        @Override
+        public void disconnected(Connection connection) {
+            LOGGER.error("Lost connection to server.");
+            new Thread(() -> {
+                client.stop();
+            }).start();
+            gameManager.serverLeft();
+        }
+    }
+
     public GameClient(String host, int port, LobbyController lobbyController, GameManager gameManager, Players players) throws IOException {
-        client = new Client();        
+        client = new Client();
         this.gameManager = gameManager;
         this.players = players;
-
         this.lobbyController = lobbyController;
-        lobbyController.setEndPoint(this);
+        this.lobbyListener = new LobbyListener();
+        this.gameListener = new GameListener();
 
         for (Player player : players.getPlayersList()) {
             if (player.getPlayerType() == Player.PlayerType.HUMAN) {
@@ -120,7 +142,6 @@ public class GameClient implements GameObserver, GameEndPoint {
 
         NetworkManager.register(client);
 
-        this.lobbyListener = new LobbyListener();
         client.addListener(lobbyListener);
 
         new Thread(() -> {
@@ -137,27 +158,43 @@ public class GameClient implements GameObserver, GameEndPoint {
 
     @Override
     public void boardAltered(int row, int col, Player player) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void gameStarted(long bagSeed) {
-
+        
     }
 
     @Override
     public void trayAltered(int index, Player player) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
     @Override
     public void turnEnded(GameManager.TurnAction action, Player player) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+    }
+
+    @Override
+    public void localPlayerLeft(Player player) {
+        client.stop();
+    }
+
+    @Override
+    public void remotePlayerLeft(Player player) {
+        
+    }
+
+    @Override
+    public void serverLeft() {
+        
     }
 
     @Override
     public void playerLeft() {
         client.stop();
+    }
+
+    @Override
+    public void switchToGameListener() {
+        client.removeListener(lobbyListener);
+        client.addListener(gameListener);
     }
 
 }

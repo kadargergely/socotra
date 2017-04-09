@@ -76,6 +76,28 @@ public class Player {
     }
 
     /**
+     * The player draws a tile from the bag given if there is place on the tray. If the player's tray is full, or there
+     * is no tile in the bag, the method returns {@code false}, {@code true} otherwise. This step is performed at the
+     * beginning of the game, when the GameManager deals the letters.
+     *
+     * @param bag
+     * @return {@code false}, if the player's tray is full, or there is no tile in the bag, {@code true} otherwise
+     */
+    public boolean drawTile(Bag bag) {
+        if (tray.getNumOfLetters() < Tray.TRAY_SIZE) {
+            Tile drawnTile = bag.getTile();
+            if (drawnTile == null) {
+                return false;
+            } else {
+                tray.addTile(drawnTile);
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * The player draws tiles from the bag given to fill his/her tray. This step is performed at the end of a turn.
      *
      * @param bag the bag from which the player draws tiles

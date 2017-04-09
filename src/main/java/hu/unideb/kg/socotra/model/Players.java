@@ -18,7 +18,9 @@
 package hu.unideb.kg.socotra.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +61,10 @@ public class Players {
             }
         }
     }
+    
+    public void remove(Player player) {
+        players.remove(player);
+    }
 
     public boolean contains(String playerName) {
         return players.stream()
@@ -97,5 +103,10 @@ public class Players {
 
     public List<Player> getPlayersList() {
         return players;
+    }
+    
+    public void sortThenShufflePlayers(long seed) {
+        Collections.sort(players, (o1, o2) -> o1.getName().compareTo(o2.getName()));
+        Collections.shuffle(players, new Random(seed));
     }
 }

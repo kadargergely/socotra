@@ -110,6 +110,17 @@ public class GameServer implements GameObserver, GameEndPoint {
                 return;
             }
         }
+        
+        @Override
+        public void disconnected(Connection c) {
+            GameConnection connection = (GameConnection) c;
+            if (connection.PLAYER_NAME != null) {
+                gameManager.remotePlayerLeft(GameServer.this.players.getPlayerByName(connection.PLAYER_NAME));
+                NetworkManager.PlayerLeft playerLeft = new NetworkManager.PlayerLeft();
+                playerLeft.PLAYER_NAME = connection.PLAYER_NAME;
+                sendToAllExceptPlayer(connection.PLAYER_NAME, playerLeft);
+            }
+        }
     }
 
     public GameServer(int port, LobbyController lobbyController, GameManager gameManager, Players players) throws IOException {
@@ -124,15 +135,13 @@ public class GameServer implements GameObserver, GameEndPoint {
         this.players = players;
         this.lobbyListener = new LobbyListener();
         this.gameListener = new GameListener();
+        this.lobbyController = lobbyController;
 
         NetworkManager.register(server);
 
         server.addListener(lobbyListener);
         server.bind(port);
         server.start();
-
-        this.lobbyController = lobbyController;
-        lobbyController.setEndPoint(this);
     }
 
     @Override
@@ -158,17 +167,35 @@ public class GameServer implements GameObserver, GameEndPoint {
     }
 
     @Override
-    public void gameStarted(long bagSeed) {
-        server.removeListener(lobbyListener);
-        server.addListener(gameListener);
+    public void localPlayerLeft(Player player) {
+        server.stop();
+    }
+
+    @Override
+    public void remotePlayerLeft(Player player) {
+        
+    }
+
+    @Override
+    public void serverLeft() {
+        
+    }
+
+    public void startGame(long shuffleSeed) {
         NetworkManager.GameStarted gameStarted = new NetworkManager.GameStarted();
-        gameStarted.BAG_SEED = bagSeed;
+        gameStarted.SHUFFLE_SEED = shuffleSeed;
         server.sendToAllTCP(gameStarted);
     }
 
     @Override
     public void playerLeft() {
         server.stop();
+    }
+
+    @Override
+    public void switchToGameListener() {
+        server.removeListener(lobbyListener);
+        server.addListener(gameListener);
     }
 
     void sendToAllExceptPlayer(String playerName, Object object) {

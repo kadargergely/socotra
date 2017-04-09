@@ -65,4 +65,6 @@ public class StringConstants {
     public static final String PLAYER_PASSWD_INCORRECT_MSG = "A csatlakozáshoz meg kell adni a kiválasztott játékoshoz tartozó jelszót.";
     public static final String CANT_JOIN_SERVER_TITLE = "Nem lehet csatlakozni a szerverhez"; 
     public static final String CANT_JOIN_SERVER_MSG = "Sajnos már nem lehet csatlakozni ehhez a szerverhez. Már elindult a játék, vagy nincs több hely.";
+    public static final String FAILED_TO_START_GAME_DB_ISSUE_TITLE = "Nem sikerült elindítani a játékot";
+    public static final String FAILED_TO_START_GAME_DB_ISSUE_MSG = "Nem sikerült elindítani a játékot. Adatbázis elérési hiba.";
 }

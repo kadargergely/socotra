@@ -27,9 +27,15 @@ public interface GameObserver {
     
     public void boardAltered(int row, int col, Player player);
     
-    public void turnEnded(GameManager.TurnAction action, Player player);
+    public void turnEnded(GameManager.TurnAction action, Player nextPlayer);
     
-    public void gameStarted(long bagSeed);  
+    public void localPlayerLeft(Player player);
+    
+    public void remotePlayerLeft(Player player);
+    
+    public void serverLeft();
+    
+//    public void gameStarted(long bagSeed);  
     
 //    public void gameEnded();
 }

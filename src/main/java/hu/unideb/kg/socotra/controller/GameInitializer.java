@@ -17,9 +17,12 @@
  */
 package hu.unideb.kg.socotra.controller;
 
+import com.esotericsoftware.kryonet.EndPoint;
+import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.GameManager;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.Players;
+import hu.unideb.kg.socotra.model.SocotraAI;
 import hu.unideb.kg.socotra.model.networking.GameClient;
 import hu.unideb.kg.socotra.model.networking.GameServer;
 import hu.unideb.kg.socotra.util.StringConstants;
@@ -38,6 +41,7 @@ public class GameInitializer {
 
     private Players players;
     private GameManager gameManager;
+    private GameWindowController gameWindowCtr;
 //    private List<GameObserver> observers;
 //    private GameEndPoint gameEndPoint;
 
@@ -65,22 +69,22 @@ public class GameInitializer {
         players.remove(playerName);
     }
 
-    public void finalizePlayers() {
+    private void finalizePlayers(SocotraApp mainApp) {
         for (Player player : players.getPlayersList()) {
             if (player.getPlayerType() == Player.PlayerType.HUMAN) {
-                GameWindowController gameWindowCtr = new GameWindowController(gameManager, player);
+                gameWindowCtr = new GameWindowController(mainApp, gameManager, player);
                 gameManager.addObserver(gameWindowCtr);
+            } else if (player.getPlayerType() == Player.PlayerType.COMPUTER) {
+                SocotraAI ai = new SocotraAI(gameManager, player);
+                gameManager.addObserver(ai);
             }
         }
-    }
-
-    public Players getPlayers() {
-        return players;
-    }
+    }    
 
     public void createServer(int port, LobbyController lobbyController) throws IOException {
         try {
             GameServer gameServer = new GameServer(port, lobbyController, gameManager, players);
+            lobbyController.setEndPoint(gameServer);
             gameManager.addObserver(gameServer);
         } catch (IOException e) {
             throw new IOException(StringConstants.SERVER_CREATION_FAILED_MSG, e.getCause());
@@ -89,7 +93,26 @@ public class GameInitializer {
 
     public void createClient(String host, int port, LobbyController lobbyController) throws IOException {
         GameClient gameClient = new GameClient(host, port, lobbyController, gameManager, players);
+        lobbyController.setEndPoint(gameClient);
         gameManager.addObserver(gameClient);
+    }
+    
+    public void initializeGame(SocotraApp mainApp, long shuffleSeed) {
+        finalizePlayers(mainApp);
+        players.sortThenShufflePlayers(shuffleSeed);        
+        gameManager.startGame(shuffleSeed);
+    }
+    
+    public Players getPlayers() {
+        return players;
+    }
+    
+    public GameWindowController getGameWindowController() {
+        return gameWindowCtr;
+    }
+    
+    public GameManager getGameManager() {
+        return gameManager;
     }
 
 }

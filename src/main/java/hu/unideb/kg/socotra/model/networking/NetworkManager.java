@@ -53,8 +53,7 @@ public class NetworkManager {
 
     public static class GameStarted {
 
-        public long BAG_SEED;
-        public String PLAYER_NAME;
+        public long SHUFFLE_SEED;
     }
 
     public static class RegisterPlayer {

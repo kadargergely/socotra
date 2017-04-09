@@ -63,7 +63,7 @@ public class CanvasController {
         this.mainCtr = mainCtr;
         tileLetterFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), tileSize * 0.7);
         tileValueFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), tileSize * 0.3);
-        backgroundImage = new Image(CanvasController.class.getResource("/images/scrabble_board.png").toString());
+        backgroundImage = new Image(CanvasController.class.getResource("/images/scrabble_board.png").toString());        
     }    
 
     private void drawTile(Tile tile, double x, double y) {

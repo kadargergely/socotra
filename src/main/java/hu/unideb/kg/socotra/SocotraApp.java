@@ -64,7 +64,6 @@ public class SocotraApp extends Application {
     private Pane registerPane;
 
     private LoginRegisterController loginRegisterCtr;
-    private GameWindowController gameWindowCtr;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -168,13 +167,13 @@ public class SocotraApp extends Application {
         }
     }
 
-    public void showGameWindow(GameWindowController.WindowType windowType) {
+    public void showGameWindow(GameWindowController gameWindowCtr, GameWindowController.WindowType windowType) {
         try {
             BorderPane gameWindowBorderPane = new BorderPane();
             GridPane gameWindowGridPane = new GridPane();
 
-            InputStreamReader inputStream = new InputStreamReader(SocotraApp.class.getResourceAsStream("/hu_HU.dic"), "UTF-8");
-            List<String> playerNames = Arrays.asList("Játékos", "Számítógép");
+//            InputStreamReader inputStream = new InputStreamReader(SocotraApp.class.getResourceAsStream("/hu_HU.dic"), "UTF-8");
+//            List<String> playerNames = Arrays.asList("Játékos", "Számítógép");
 //            List<GameInitializer.PlayerType> playerTypes = Arrays.asList(GameManager.PlayerType.HUMAN, GameManager.PlayerType.COMPUTER);
 //            gameWindowCtr = GameInitializer.initGame(inputStream, playerNames, playerTypes);
 
@@ -217,6 +216,8 @@ public class SocotraApp extends Application {
                 // Binding the width and height of the canvas to keep its square aspect ratio 
                 middleGridPaneCtr.getGridPane().getRowConstraints().get(1).prefHeightProperty().bind(middleGridPaneCtr.getGridPane().widthProperty());
                 middleGridPaneCtr.getGridPane().getColumnConstraints().get(1).prefWidthProperty().bind(middleGridPaneCtr.getGridPane().heightProperty());
+                // Repainting the canvas
+                gameWindowCtr.getCanvasCtr().repaint();
 
                 // Creating right pane with game history table and buttons
                 AnchorPane rightRootPane = new AnchorPane();

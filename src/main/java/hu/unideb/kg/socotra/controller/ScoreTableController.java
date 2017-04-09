@@ -40,7 +40,7 @@ public class ScoreTableController {
     @FXML
     private TableColumn scoreColumn;
 
-    private class PlayerScore {
+    public class PlayerScore {
 
         private SimpleStringProperty name;
         private SimpleIntegerProperty score;
@@ -65,6 +65,14 @@ public class ScoreTableController {
         public void setScore(int score) {
             this.score.set(score);
         }
+        
+        public SimpleStringProperty nameProperty() {
+            return this.name;
+        }
+        
+        public SimpleIntegerProperty scoreProperty() {
+            return this.score;
+        }
     }
 
     private GameWindowController mainCtr;
@@ -79,19 +87,18 @@ public class ScoreTableController {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         scoreColumn.setCellValueFactory(new PropertyValueFactory<>("score"));
         tableData = FXCollections.observableArrayList();
+        
+        update();
+        
         scoreTable.setItems(tableData);
     }
 
     public void update() {
+        tableData.clear();
         List<String> playerNames = mainCtr.getGameManager().getPlayerNames();
-        List<Integer> playerScores = mainCtr.getGameManager().getPlayerScores();
-
+        List<Integer> playerScores = mainCtr.getGameManager().getPlayerScores();        
         for (int i = 0; i < playerNames.size(); i++) {
-            for (PlayerScore ps : tableData) {
-                if (playerNames.get(i).equals(ps.getName())) {
-                    ps.setScore(playerScores.get(i));
-                }
-            }
+            tableData.add(new PlayerScore(playerNames.get(i), playerScores.get(i)));
         }
     }
 }

@@ -171,8 +171,11 @@ public class JoinServerController {
             if (newValue != null) {
                 ServerEntity selectedServer = getServerEntityByName(((AvailableServer) newValue).getName());
                 setServerData(selectedServer);
+                connectButton.setDisable(false);
             }
         });
+        
+        connectButton.setDisable(true);
 
         refreshAvailableServersList();
     }

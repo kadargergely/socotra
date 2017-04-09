@@ -15,15 +15,46 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.unideb.kg.socotra.model.networking;
+package hu.unideb.kg.socotra.model;
 
 /**
  *
  * @author gkadar
  */
-public interface GameEndPoint {
+public class SocotraAI implements GameObserver {
 
-    public void playerLeft();
-    
-    public void switchToGameListener();
+    public SocotraAI(GameManager gameManager, Player player) {
+
+    }
+
+    @Override
+    public void trayAltered(int index, Player player) {
+        
+    }
+
+    @Override
+    public void boardAltered(int row, int col, Player player) {
+        
+    }
+
+    @Override
+    public void turnEnded(GameManager.TurnAction action, Player player) {
+        
+    }
+
+    @Override
+    public void localPlayerLeft(Player player) {
+        
+    }
+
+    @Override
+    public void remotePlayerLeft(Player player) {
+        
+    }
+
+    @Override
+    public void serverLeft() {
+        
+    }
+
 }

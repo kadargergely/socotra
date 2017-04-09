@@ -17,10 +17,26 @@
  */
 package hu.unideb.kg.socotra.controller;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.MenuItem;
+
 /**
  *
  * @author Gergely Kadar
  */
 public class MenuBarController {
+
+    @FXML
+    private MenuItem exitMenuItem;
     
+    private GameWindowController mainCtr;
+
+    public MenuBarController(GameWindowController mainCtr) {
+        this.mainCtr = mainCtr;
+    }
+
+    @FXML
+    private void exitPressed() {
+        mainCtr.handleExitButton();
+    }
 }
