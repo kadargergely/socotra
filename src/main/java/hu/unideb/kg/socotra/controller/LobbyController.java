@@ -17,7 +17,6 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.networking.GameEndPoint;
 import hu.unideb.kg.socotra.model.networking.GameServer;

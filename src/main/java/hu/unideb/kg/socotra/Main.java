@@ -17,6 +17,7 @@
  */
 package hu.unideb.kg.socotra;
 
+import hu.unideb.kg.socotra.controller.SocotraApp;
 import hu.unideb.kg.socotra.model.persistence.DBConnection;
 import java.util.Set;
 import org.slf4j.Logger;

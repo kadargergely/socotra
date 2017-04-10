@@ -17,7 +17,6 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.GameManager;
 import hu.unideb.kg.socotra.model.GameObserver;
 import hu.unideb.kg.socotra.model.Player;
@@ -31,7 +30,7 @@ import javafx.application.Platform;
  *
  * @author Gergely Kadar
  */
-public class GameWindowController implements GameView, GameObserver {
+public class GameWindowController implements GameObserver, MenuBarMainController {
 
     private ScoreTableController scoreTableCtr;
     private ChatController chatCtr;
@@ -52,7 +51,7 @@ public class GameWindowController implements GameView, GameObserver {
         scoreTableCtr = new ScoreTableController(this);
         chatCtr = new ChatController();
         historyCtr = new HistoryController(this);
-        menuBarCtr = new MenuBarController(this);
+        menuBarCtr = new MenuBarController(this, true);
         canvasCtr = new CanvasController(this);
         buttonsCtr = new ButtonsController(this);
     }
@@ -98,27 +97,56 @@ public class GameWindowController implements GameView, GameObserver {
         player.alterTray(index);
     }
 
-    void handleDoneButton() {
+    @Override
+    public void handleExitButton() {
+        gameManager.localPlayerLeft(player);
+        mainApp.getPrimaryStage().close();
+    }
+
+    @Override
+    public void handleNewGameButton() {
+        
+    }
+
+    @Override
+    public void handleLoadGameButton() {
+        
+    }
+
+    @Override
+    public void handleSaveGameButton() {
+        
+    }
+
+    @Override
+    public void handleDoneButton() {
         if (gameManager.endTurn(GameManager.TurnAction.PLAY, player)) {
             update();
         }
     }
 
-    void handleRedrawButton() {
+    @Override
+    public void handleRedrawButton() {
         if (gameManager.endTurn(GameManager.TurnAction.SWAP, player)) {
             update();
         }
     }
 
-    void handlePassButton() {
+    @Override
+    public void handlePassButton() {
         if (gameManager.endTurn(GameManager.TurnAction.PASS, player)) {
             update();
         }
     }
 
-    void handleExitButton() {
-        gameManager.localPlayerLeft(player);
-        mainApp.getPrimaryStage().close();
+    @Override
+    public void handleUndoButton() {
+        
+    }
+
+    @Override
+    public void handleHelpButton() {
+        
     }
 
 //    @Override
@@ -152,7 +180,7 @@ public class GameWindowController implements GameView, GameObserver {
         return historyCtr;
     }
 
-    public MenuBarController getMenuBarCtr() {
+    MenuBarController getMenuBarCtr() {
         return menuBarCtr;
     }
 
@@ -179,17 +207,11 @@ public class GameWindowController implements GameView, GameObserver {
 //    public void setPlayer(LocalHumanPlayer player) {
 //        this.player = player;
 //    }
-    @Override
-    public void update() {
+    
+    private void update() {
         canvasCtr.repaint();
         scoreTableCtr.update();
         historyCtr.update();
-    }
-
-    @Override
-    public void drawTileInHand(Tile tileInHand) {
-        // TODO Auto-generated method stub
-
     }
 
 }

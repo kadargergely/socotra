@@ -15,17 +15,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.unideb.kg.socotra;
+package hu.unideb.kg.socotra.controller;
 
 import hu.unideb.kg.socotra.controller.AddPlayerController;
 import hu.unideb.kg.socotra.controller.ChoosePlayerController;
 import hu.unideb.kg.socotra.controller.GameWindowController;
+import hu.unideb.kg.socotra.controller.InitialWindowController;
 import hu.unideb.kg.socotra.controller.JoinServerController;
 import hu.unideb.kg.socotra.controller.LobbyController;
 import hu.unideb.kg.socotra.controller.LoginController;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import hu.unideb.kg.socotra.controller.LoginRegisterController;
+import hu.unideb.kg.socotra.controller.MenuBarController;
 import hu.unideb.kg.socotra.controller.MiddleGridPaneController;
 import hu.unideb.kg.socotra.controller.RegisterController;
 import hu.unideb.kg.socotra.controller.TestWindowController;
@@ -167,6 +169,52 @@ public class SocotraApp extends Application {
         }
     }
 
+    public void showInitialWindow() {
+        try {
+            BorderPane borderPane = new BorderPane();
+            GridPane gridPane = new GridPane();
+
+            InitialWindowController initialWindowCtr = new InitialWindowController(this);
+
+            borderPane.setTop(loadNode("/fxmls/MenuBar.fxml", initialWindowCtr.getMenuBarController()));
+
+            // Creating middle pane with canvas
+            MiddleGridPaneController middleGridPaneCtr = new MiddleGridPaneController();
+            AnchorPane middleGridPane = (AnchorPane) loadNode("/fxmls/MiddleGridPane.fxml", middleGridPaneCtr);
+            Canvas canvas = new ResizableCanvas();
+            initialWindowCtr.getCanvasController().setCanvas(canvas);
+            canvas.setWidth(550);
+            canvas.setHeight(550);
+            AnchorPane.setTopAnchor(canvas, 12.5);
+            AnchorPane.setBottomAnchor(canvas, 12.5);
+            AnchorPane.setLeftAnchor(canvas, 12.5);
+            AnchorPane.setRightAnchor(canvas, 12.5);
+            middleGridPaneCtr.getCanvasRootPane().getChildren().add(canvas);
+            GridPane.setHgrow(middleGridPane, Priority.ALWAYS);
+            GridPane.setVgrow(middleGridPane, Priority.SOMETIMES);
+            GridPane.setConstraints(middleGridPane, 2, 1);
+            // Binding the width and height of the canvas to keep its square aspect ratio 
+            middleGridPaneCtr.getGridPane().getRowConstraints().get(1).prefHeightProperty().bind(middleGridPaneCtr.getGridPane().widthProperty());
+            middleGridPaneCtr.getGridPane().getColumnConstraints().get(1).prefWidthProperty().bind(middleGridPaneCtr.getGridPane().heightProperty());
+            // Repainting the canvas
+            initialWindowCtr.getCanvasController().repaint();
+            
+            gridPane.getChildren().add(middleGridPane);
+            borderPane.setCenter(gridPane);
+            
+            Scene scene = new Scene(borderPane);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Socotra");
+            primaryStage.show();
+            
+            borderPane.setPrefSize(600, 600);
+            primaryStage.setMinHeight(primaryStage.getHeight() - scene.getHeight() + 600);
+            primaryStage.setMinWidth(primaryStage.getWidth() - scene.getWidth()+ 600);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
     public void showGameWindow(GameWindowController gameWindowCtr, GameWindowController.WindowType windowType) {
         try {
             BorderPane gameWindowBorderPane = new BorderPane();
@@ -176,7 +224,6 @@ public class SocotraApp extends Application {
 //            List<String> playerNames = Arrays.asList("Játékos", "Számítógép");
 //            List<GameInitializer.PlayerType> playerTypes = Arrays.asList(GameManager.PlayerType.HUMAN, GameManager.PlayerType.COMPUTER);
 //            gameWindowCtr = GameInitializer.initGame(inputStream, playerNames, playerTypes);
-
             gameWindowBorderPane.setTop(loadNode("/fxmls/MenuBar.fxml", gameWindowCtr.getMenuBarCtr()));
 
             if (windowType == GameWindowController.WindowType.MULTIPLAYER) {
@@ -269,7 +316,7 @@ public class SocotraApp extends Application {
 
     public void showNewGameWindow(NewGameController ctr) {
         try {
-            
+
             AnchorPane rootPane = (AnchorPane) loadNode("/fxmls/NewGame.fxml", ctr);
             Scene scene = new Scene(rootPane);
             primaryStage.setScene(scene);
@@ -296,7 +343,7 @@ public class SocotraApp extends Application {
             LOGGER.error(e.getMessage(), e);
         }
     }
-    
+
     public void showChoosePlayerWindow(ChoosePlayerController choosePlayerController) {
         try {
             AnchorPane pane = (AnchorPane) loadNode("/fxmls/ChoosePlayer.fxml", choosePlayerController);
@@ -325,7 +372,7 @@ public class SocotraApp extends Application {
             LOGGER.error(e.getMessage(), e);
         }
     }
-    
+
     public void showJoinServerWindow(JoinServerController ctr) {
         try {
             AnchorPane pane = (AnchorPane) loadNode("/fxmls/JoinServer.fxml", ctr);
@@ -365,7 +412,7 @@ public class SocotraApp extends Application {
             throw new IOException("Failed to load " + fxmlPath, e);
         }
     }
-    
+
     public Stage getPrimaryStage() {
         return this.primaryStage;
     }

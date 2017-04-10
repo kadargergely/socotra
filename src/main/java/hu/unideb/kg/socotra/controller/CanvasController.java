@@ -17,7 +17,6 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.Tile;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -63,8 +62,12 @@ public class CanvasController {
         this.mainCtr = mainCtr;
         tileLetterFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), tileSize * 0.7);
         tileValueFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), tileSize * 0.3);
-        backgroundImage = new Image(CanvasController.class.getResource("/images/scrabble_board.png").toString());        
-    }    
+        backgroundImage = new Image(CanvasController.class.getResource("/images/scrabble_board.png").toString());
+    }
+
+    public CanvasController() {
+        this(null);
+    }
 
     private void drawTile(Tile tile, double x, double y) {
         gc.setFill(Color.BEIGE);
@@ -79,7 +82,7 @@ public class CanvasController {
             gc.setFont(tileValueFont);
             gc.fillText(String.valueOf(tile.getValue()), x + tileSize * 0.8, y + tileSize * 0.8);
         }
-    }   
+    }
 
     public Canvas getCanvas() {
         return canvas;
@@ -93,15 +96,17 @@ public class CanvasController {
     }
 
     private void onMousePressed(MouseEvent e) {
-        if (e.getX() > canvas.getWidth() * (35.0 / 550.0) && e.getX() < canvas.getWidth() * (515.0 / 550.0)
-                && e.getY() > canvas.getHeight() * (10.0 / 550.0) && e.getY() < canvas.getHeight() * (490.0 / 550.0)) {
-            int row = (int) (e.getY() - canvas.getHeight() * (10.0 / 550.0)) / 32;
-            int col = (int) (e.getX() - canvas.getWidth() * (35.0 / 550.0)) / 32;
-            mainCtr.mousePressedOnBoard(row, col);
-        } else if (e.getX() > canvas.getWidth() * (163.0 / 550.0) && e.getX() < canvas.getWidth() * (387.0 / 550.0)
-                && e.getY() > canvas.getHeight() * (504.0 / 550.0) && e.getY() < canvas.getHeight() * (536.0 / 550.0)) {
-            int index = (int) (e.getX() - canvas.getWidth() * (163.0 / 550.0)) / 32;
-            mainCtr.mousePressedOnTray(index);
+        if (mainCtr != null) {
+            if (e.getX() > canvas.getWidth() * (35.0 / 550.0) && e.getX() < canvas.getWidth() * (515.0 / 550.0)
+                    && e.getY() > canvas.getHeight() * (10.0 / 550.0) && e.getY() < canvas.getHeight() * (490.0 / 550.0)) {
+                int row = (int) (e.getY() - canvas.getHeight() * (10.0 / 550.0)) / 32;
+                int col = (int) (e.getX() - canvas.getWidth() * (35.0 / 550.0)) / 32;
+                mainCtr.mousePressedOnBoard(row, col);
+            } else if (e.getX() > canvas.getWidth() * (163.0 / 550.0) && e.getX() < canvas.getWidth() * (387.0 / 550.0)
+                    && e.getY() > canvas.getHeight() * (504.0 / 550.0) && e.getY() < canvas.getHeight() * (536.0 / 550.0)) {
+                int index = (int) (e.getX() - canvas.getWidth() * (163.0 / 550.0)) / 32;
+                mainCtr.mousePressedOnTray(index);
+            }
         }
     }
 
@@ -117,28 +122,30 @@ public class CanvasController {
         gc.setFill(Color.DARKGREEN);
         gc.fillRect(canvas.getWidth() * (153.0 / 550.0), canvas.getHeight() * (494.0 / 550.0),
                 canvas.getWidth() * (244.0 / 550.0), canvas.getHeight() * (52.0 / 550.0));
-        // draw tiles on board
-        Tile[][] boardTiles = mainCtr.getGameManager().getGameBoardTiles();
-        for (int i = 0; i < boardTiles.length; i++) {
-            for (int j = 0; j < boardTiles[i].length; j++) {
-                if (boardTiles[i][j] != null) {
-                    drawTile(boardTiles[i][j], canvas.getWidth() * (35.0 / 550.0) + j * canvas.getWidth() * (32.0 / 550.0),
-                            canvas.getHeight() * (10.0 / 550.0) + i * canvas.getHeight() * (32.0 / 550));
+        if (mainCtr != null) {
+            // draw tiles on board
+            Tile[][] boardTiles = mainCtr.getGameManager().getGameBoardTiles();
+            for (int i = 0; i < boardTiles.length; i++) {
+                for (int j = 0; j < boardTiles[i].length; j++) {
+                    if (boardTiles[i][j] != null) {
+                        drawTile(boardTiles[i][j], canvas.getWidth() * (35.0 / 550.0) + j * canvas.getWidth() * (32.0 / 550.0),
+                                canvas.getHeight() * (10.0 / 550.0) + i * canvas.getHeight() * (32.0 / 550));
+                    }
                 }
             }
-        }
-        // draw tiles on tray
-        Tile[] trayTiles = mainCtr.getPlayer().getTrayTiles();
-        for (int i = 0; i < trayTiles.length; i++) {
-            if (trayTiles[i] != null) {
-                drawTile(trayTiles[i], canvas.getWidth() * (163.0 / 550.0) + i * canvas.getWidth() * (32.0 / 550.0),
-                        canvas.getHeight() * (504.0 / 550.0));
+            // draw tiles on tray
+            Tile[] trayTiles = mainCtr.getPlayer().getTrayTiles();
+            for (int i = 0; i < trayTiles.length; i++) {
+                if (trayTiles[i] != null) {
+                    drawTile(trayTiles[i], canvas.getWidth() * (163.0 / 550.0) + i * canvas.getWidth() * (32.0 / 550.0),
+                            canvas.getHeight() * (504.0 / 550.0));
+                }
             }
-        }
-        // draw tile in hand
-        Tile tileInHand = mainCtr.getPlayer().getTileInHand();
-        if (tileInHand != null) {
-            drawTile(tileInHand, mouseX, mouseY);
+            // draw tile in hand
+            Tile tileInHand = mainCtr.getPlayer().getTileInHand();
+            if (tileInHand != null) {
+                drawTile(tileInHand, mouseX, mouseY);
+            }
         }
 //        drawTile(new Tile("TY", 10), canvas.getWidth() * (35.0 / 550.0), canvas.getHeight() * (10.0 / 550.0));
     }

@@ -3,26 +3,49 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.input.KeyCodeCombination?>
 
 <MenuBar xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
   <menus>
-    <Menu mnemonicParsing="false" text="File">
+    <Menu mnemonicParsing="false" text="Játék">
       <items>
+            <MenuItem fx:id="newGameMenuItem" mnemonicParsing="false" onAction="#newGamePressed" text="Új játék...">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="saveGameMenuItem" mnemonicParsing="false" onAction="#saveGamePressed" text="Játék mentése...">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator>
+            </MenuItem>
+            <MenuItem fx:id="loadGameMenuItem" mnemonicParsing="false" onAction="#loadGamePressed" text="Játék betöltése...">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator>
+            </MenuItem>
         <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitPressed" text="Kilépés">
                <accelerator>
                   <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />
                </accelerator></MenuItem>
       </items>
     </Menu>
-    <Menu mnemonicParsing="false" text="Edit">
+    <Menu fx:id="turnMenu" mnemonicParsing="false" text="Lépés">
       <items>
-        <MenuItem mnemonicParsing="false" text="Delete" />
+        <MenuItem fx:id="doneMenuItem" mnemonicParsing="false" onAction="#donePressed" text="Kész" />
+            <MenuItem fx:id="redrawMenuItem" mnemonicParsing="false" onAction="#redrawPressed" text="Csere" />
+            <MenuItem fx:id="passMenuItem" mnemonicParsing="false" onAction="#passPressed" text="Passz" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="undoMenuItem" mnemonicParsing="false" onAction="#undoPressed" text="Visszavonás" />
       </items>
     </Menu>
-    <Menu mnemonicParsing="false" text="Help">
+    <Menu mnemonicParsing="false" text="Segítség">
       <items>
-        <MenuItem mnemonicParsing="false" text="About" />
+        <MenuItem fx:id="helpMenuItem" mnemonicParsing="false" onAction="#helpPressed" text="A játékról">
+               <accelerator>
+                  <KeyCodeCombination alt="ANY" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator></MenuItem>
       </items>
     </Menu>
   </menus>

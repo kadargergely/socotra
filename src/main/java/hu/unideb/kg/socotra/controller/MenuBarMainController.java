@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Gergely Kadar
+ * Copyright (C) 2017 gkadar
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,32 +15,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package hu.unideb.kg.socotra.view;
-
-import hu.unideb.kg.socotra.controller.SocotraApp;
-import javafx.scene.layout.AnchorPane;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package hu.unideb.kg.socotra.controller;
 
 /**
- * A version of AnchorPane, which keeps an aspect ratio when resized.
  *
- * @author Gergely Kadar
+ * @author gkadar
  */
-public class ResizableAnchorPane extends AnchorPane {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResizableAnchorPane.class);
+interface MenuBarMainController {   
     
-    public ResizableAnchorPane() {
-    }
+    public void handleExitButton();
     
-    @Override
-    public void setWidth(double width) {
-        super.setWidth(width);
-    }    
+    public void handleNewGameButton();
     
-    @Override
-    public void setHeight(double height) {
-        super.setHeight(height);
-    }
+    public void handleLoadGameButton();
+    
+    public void handleSaveGameButton();
+    
+    public void handleDoneButton();
+    
+    public void handleRedrawButton();
+    
+    public void handlePassButton();
+    
+    public void handleUndoButton();
+    
+    public void handleHelpButton();
 }

@@ -17,7 +17,6 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.networking.NetworkManager;
 import hu.unideb.kg.socotra.model.persistence.DBConnectionException;
@@ -219,7 +218,7 @@ public class NewGameController {
                 .map(p -> p.getType())
                 .filter(t -> t.equals(StringConstants.LOCAL_PLAYER))
                 .findAny().isPresent();
-        mainApp.showNewPlayerWindow(new AddPlayerController(this, true, localHuman));
+        mainApp.showNewPlayerWindow(new AddPlayerController(this, multiplayer, localHuman));
     }
 
     @FXML
@@ -309,6 +308,8 @@ public class NewGameController {
             } catch (ExistingServerNameException ex) {
                 AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.EXISTING_SERVER_NAME_MSG);
             }
+        } else {
+            
         }
     }
 

@@ -18,7 +18,6 @@
 package hu.unideb.kg.socotra.controller;
 
 import com.esotericsoftware.kryonet.EndPoint;
-import hu.unideb.kg.socotra.SocotraApp;
 import hu.unideb.kg.socotra.model.GameManager;
 import hu.unideb.kg.socotra.model.Player;
 import hu.unideb.kg.socotra.model.Players;

@@ -17,7 +17,6 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import hu.unideb.kg.socotra.SocotraApp;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

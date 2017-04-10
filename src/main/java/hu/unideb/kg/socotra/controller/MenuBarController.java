@@ -18,25 +18,94 @@
 package hu.unideb.kg.socotra.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 
 /**
  *
  * @author Gergely Kadar
  */
-public class MenuBarController {
+class MenuBarController {
 
     @FXML
+    private MenuItem newGameMenuItem;
+    @FXML
+    private MenuItem saveGameMenuItem;
+    @FXML
+    private MenuItem loadGameMenuItem;
+    @FXML
     private MenuItem exitMenuItem;
-    
-    private GameWindowController mainCtr;
+    @FXML
+    private MenuItem doneMenuItem;
+    @FXML
+    private MenuItem redrawMenuItem;
+    @FXML
+    private MenuItem passMenuItem;
+    @FXML
+    private MenuItem undoMenuItem;
+    @FXML
+    private MenuItem helpMenuItem;
+    @FXML
+    private Menu turnMenu;
 
-    public MenuBarController(GameWindowController mainCtr) {
+    private boolean inGame;
+
+    private MenuBarMainController mainCtr;
+
+    public MenuBarController(MenuBarMainController mainCtr, boolean inGame) {
         this.mainCtr = mainCtr;
+        this.inGame = inGame;
+    }
+
+    @FXML
+    private void initialize() {
+        turnMenu.setVisible(inGame);
+    }
+    
+    @FXML
+    private void newGamePressed() {
+        mainCtr.handleNewGameButton();
+    }
+    
+    @FXML
+    private void saveGamePressed() {
+        
+    }
+    
+    @FXML
+    private void loadGamePressed() {
+        
+    }
+    
+    @FXML
+    private void donePressed() {
+        
+    }
+    
+    @FXML
+    private void redrawPressed() {
+        
+    }
+    
+    @FXML
+    private void passPressed() {
+        
+    }
+    
+    @FXML
+    private void undoPressed() {
+        
+    }
+    
+    @FXML
+    private void helpPressed() {
+        
     }
 
     @FXML
     private void exitPressed() {
         mainCtr.handleExitButton();
     }
+    
+    
 }
