@@ -30,6 +30,8 @@ class MenuBarController {
     @FXML
     private MenuItem newGameMenuItem;
     @FXML
+    private MenuItem joinMenuItem;
+    @FXML
     private MenuItem saveGameMenuItem;
     @FXML
     private MenuItem loadGameMenuItem;
@@ -60,11 +62,17 @@ class MenuBarController {
     @FXML
     private void initialize() {
         turnMenu.setVisible(inGame);
+        saveGameMenuItem.setVisible(inGame);
     }
     
     @FXML
     private void newGamePressed() {
         mainCtr.handleNewGameButton();
+    }
+    
+    @FXML
+    private void joinPressed() {
+        mainCtr.handleJoinButton();
     }
     
     @FXML

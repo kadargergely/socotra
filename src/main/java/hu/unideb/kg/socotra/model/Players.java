@@ -92,6 +92,17 @@ public class Players {
     public int getNumOfPlayers() {
         return players.size();
     }
+    
+    public String getLocalPlayerName() {
+        String playerName = null;
+        for (Player player : players) {
+            if (player.getPlayerType() == Player.PlayerType.HUMAN) {
+                playerName = player.getName();
+                break;
+            }
+        }
+        return playerName;
+    }
 
     public List<String> getPlayerNames() {
         return players.stream().map(p -> p.getName()).collect(Collectors.toList());

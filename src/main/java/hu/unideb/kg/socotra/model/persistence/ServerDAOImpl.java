@@ -18,7 +18,6 @@
 package hu.unideb.kg.socotra.model.persistence;
 
 import hu.unideb.kg.socotra.controller.GameInitializer;
-import hu.unideb.kg.socotra.model.GameManager;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -44,9 +43,10 @@ public class ServerDAOImpl implements ServerDAO {
             entityManager = DBConnection.getEntityManager();
             TypedQuery<ServerEntity> query = entityManager.createQuery(
                     "SELECT s FROM ServerEntity s "
-                    + "WHERE s.serverState = :serverState AND s.privateServer = :privateServer", ServerEntity.class);
-            query.setParameter("serverState", ServerEntity.ServerState.LOBBY);
+                    + "WHERE s.privateServer = :privateServer "
+                    + "AND s.availablePlaces > :availablePlaces", ServerEntity.class);
             query.setParameter("privateServer", false);
+            query.setParameter("availablePlaces", 0);
             servers = query.getResultList();
             LOGGER.info("List of available servers successfully fetched from database.");
         } catch (PersistenceException e) {
@@ -113,7 +113,10 @@ public class ServerDAOImpl implements ServerDAO {
             entityManager = DBConnection.getEntityManager();
             TypedQuery<ServerEntity> query = entityManager.createQuery(
                     "SELECT s FROM ServerEntity s WHERE s.name = :name", ServerEntity.class);
-            server = query.setParameter("name", name).getSingleResult();
+            List<ServerEntity> resultList = query.setParameter("name", name).getResultList();
+            if (resultList.size() == 1) {
+                server = resultList.get(0);
+            }
             LOGGER.info("Server with name " + name + " successfully fetched from the database.");
         } catch (PersistenceException e) {
             LOGGER.warn("Failed to fetch server with name " + name + " from database.", e);
@@ -244,17 +247,17 @@ public class ServerDAOImpl implements ServerDAO {
     }
 
     @Override
-    public void setServerStatus(ServerEntity server, ServerEntity.ServerState serverState) throws DBConnectionException {
+    public void removeServer(ServerEntity server) throws DBConnectionException {
         EntityManager entityManager = null;
         try {
             entityManager = DBConnection.getEntityManager();
             entityManager.getTransaction().begin();
             server = entityManager.find(ServerEntity.class, server.getServerId());
-            server.setServerState(serverState);
+            entityManager.remove(server);
             entityManager.getTransaction().commit();
-            LOGGER.info("Status successfully set for server named " + server.getName() + ".");
+            LOGGER.info("Server named " + server.getName() + " successfully removed from database.");
         } catch (PersistenceException e) {
-            LOGGER.warn("Failed to set status for server named " + server.getName() + ".", e);
+            LOGGER.warn("Failed to remove server named " + server.getName() + " from database.", e);
             throw new DBConnectionException();
         } finally {
             closeEntityManager(entityManager);

@@ -17,31 +17,32 @@
  */
 package hu.unideb.kg.socotra.controller;
 
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.stage.Stage;
+
 /**
  *
  * @author gkadar
  */
-interface MenuBarMainController {   
+public class WaitDialogController {
     
-    public void handleExitButton();
+    @FXML
+    private Label messageLabel;
+
+    private String message;
     
-    public void handleNewGameButton();
+    public WaitDialogController(String message) {
+        this.message = message;
+    } 
     
-    public void handleJoinButton();
+    @FXML
+    private void initialize() {
+        messageLabel.setText(message);
+    }
     
-    public void handleLoadGameButton();
-    
-    public void handleSaveGameButton();
-    
-    public void handleDoneButton();
-    
-    public void handleRedrawButton();
-    
-    public void handlePassButton();
-    
-    public void handleExtendButton();
-    
-    public void handleUndoButton();
-    
-    public void handleHelpButton();
+    public void close() {
+        Stage stage = (Stage) messageLabel.getScene().getWindow();
+        stage.close();
+    }
 }

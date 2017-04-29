@@ -52,9 +52,9 @@ public class StringConstants {
     public static final String SERVER_PLAYER_STATUS_CONNECTED = "Csatlakozva";
     public static final String SERVER_PLAYER_STATUS_FREE = "Szabad";
     public static final String ADD_SERVER_TITLE = "Szerver hozzáadása";
-    public static final String ADD_SERVER_TEXT = "Szerver IP címe";
-    public static final String NO_SERVERS_AT_IP_TITLE = "Nem található szerver";
-    public static final String NO_SERVERS_AT_IP_MSG = "Nem található elérhető szerver a megadott IP címen.";
+    public static final String ADD_SERVER_TEXT = "Szerver neve";
+    public static final String PRIVATE_SERVER_DOESNT_EXIST_TITLE = "Nem található szerver";
+    public static final String PRIVATE_SERVER_DOESNT_EXIST_MSG = "Nem található elérhető privát szerver a megadott névvel.";
     public static final String NEW_PLAYER = "Új játékos";
     public static final String PASSWORD = "jelszó";
     public static final String FAILED_TO_JOIN_SERVER_TITLE = "Szerver csatlakozási hiba";
@@ -64,7 +64,18 @@ public class StringConstants {
     public static final String PLAYER_PASSWD_INCORRECT_TITLE = "Hibás jelszó";
     public static final String PLAYER_PASSWD_INCORRECT_MSG = "A csatlakozáshoz meg kell adni a kiválasztott játékoshoz tartozó jelszót.";
     public static final String CANT_JOIN_SERVER_TITLE = "Nem lehet csatlakozni a szerverhez"; 
-    public static final String CANT_JOIN_SERVER_MSG = "Sajnos már nem lehet csatlakozni ehhez a szerverhez. Már elindult a játék, vagy nincs több hely.";
+    public static final String CANT_JOIN_SERVER_MSG = "Sajnos már nem lehet csatlakozni ehhez a szerverhez. A szerver már nem elérhető, vagy nincs több hely.";
     public static final String FAILED_TO_START_GAME_DB_ISSUE_TITLE = "Nem sikerült elindítani a játékot";
     public static final String FAILED_TO_START_GAME_DB_ISSUE_MSG = "Nem sikerült elindítani a játékot. Adatbázis elérési hiba.";
+    public static final String CANT_JOIN_ANY_GAME_TITLE = "Nem lehet játékhoz csatlakozni";
+    public static final String CANT_JOIN_ANY_GAME_DICT_ERR_MSG = "Nem lehet játékhoz csatlakozni. Nem elérhető a szótár.";
+    public static final String WAITING = "Várakozás";
+    public static final String CREATING_SERVER_IN_PROGRESS = "Szerver létrehozása folyamatban...";
+    public static final String NO_PLAYERS_ADDED = "Nincsenek játékosok a játékban";
+    public static final String NEW_GAME = "Új játék";
+    public static final String WAITING_FOR_PLAYERS_WINDOW_TITLE = "Várakozás a játékosokra";
+    public static final String JOIN_GAME_WINDOW_TITLE = "Játékhoz csatlakozás";
+    public static final String NO_WORDS_PLAYED_YET = "Nincs lerakott szó";
+    public static final String CHOOSE_JOKER_LETTER_TITLE = "Joker betű kiválasztása";
+    public static final String CHOOSE_JOKER_LETTER_MSG = "Válaszd ki a betűt:";
 }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
-
-<AnchorPane id="AnchorPane" prefHeight="150.0" prefWidth="275.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+<AnchorPane id="AnchorPane" prefHeight="150.0" prefWidth="275.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane layoutX="38.0" layoutY="30.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columnConstraints>
-          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
@@ -22,26 +22,44 @@
          <children>
             <GridPane GridPane.rowIndex="1">
               <columnConstraints>
-                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="70.0" minWidth="70.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="70.0" minWidth="70.0" prefWidth="100.0" />
-                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="70.0" minWidth="70.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="10.0" />
+                <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="70.0" prefWidth="79.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="70.0" prefWidth="79.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="70.0" prefWidth="79.0" />
+                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="10.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Button fx:id="doneButton" mnemonicParsing="false" onMouseClicked="#doneButtonClicked" prefHeight="25.0" prefWidth="64.0" text="Kész" GridPane.columnIndex="1" />
-                  <Button fx:id="redrawButton" mnemonicParsing="false" onMouseClicked="#redrawButtonClicked" prefWidth="64.0" text="Csere" GridPane.columnIndex="2" />
-                  <Button fx:id="passButton" mnemonicParsing="false" onMouseClicked="#passButtonClicked" prefWidth="64.0" text="Passz" GridPane.columnIndex="3" />
+                  <Button fx:id="doneButton" mnemonicParsing="false" onMouseClicked="#doneButtonClicked" prefHeight="25.0" prefWidth="75.0" text="Kész" GridPane.columnIndex="1" />
+                  <Button fx:id="redrawButton" mnemonicParsing="false" onMouseClicked="#redrawButtonClicked" prefWidth="75.0" text="Csere" GridPane.columnIndex="2" />
+                  <Button fx:id="passButton" mnemonicParsing="false" onMouseClicked="#passButtonClicked" prefWidth="75.0" text="Passz" GridPane.columnIndex="3" />
                </children>
             </GridPane>
-            <Label fx:id="timerLabel" text="0:00">
-               <font>
-                  <Font size="44.0" />
-               </font>
-            </Label>
+            <GridPane>
+               <columnConstraints>
+                  <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="10.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="157.0" minWidth="10.0" prefWidth="156.0" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" prefWidth="79.0" />
+                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label fx:id="timerLabel" text="0:00" GridPane.columnIndex="1">
+                     <font>
+                        <Font size="44.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="extendButton" mnemonicParsing="false" onAction="#extendButtonClicked" text="Hosszabbít" GridPane.columnIndex="2">
+                     <GridPane.margin>
+                        <Insets left="2.0" />
+                     </GridPane.margin>
+                  </Button>
+               </children>
+            </GridPane>
          </children>
       </GridPane>
    </children>

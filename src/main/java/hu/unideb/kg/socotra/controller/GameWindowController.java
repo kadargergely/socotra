@@ -19,11 +19,10 @@ package hu.unideb.kg.socotra.controller;
 
 import hu.unideb.kg.socotra.model.GameManager;
 import hu.unideb.kg.socotra.model.GameObserver;
+import hu.unideb.kg.socotra.model.Letters;
 import hu.unideb.kg.socotra.model.Player;
-import hu.unideb.kg.socotra.model.Tile;
 import hu.unideb.kg.socotra.util.AlertCreator;
 import hu.unideb.kg.socotra.util.StringConstants;
-import hu.unideb.kg.socotra.view.GameView;
 import javafx.application.Platform;
 
 /**
@@ -31,6 +30,11 @@ import javafx.application.Platform;
  * @author Gergely Kadar
  */
 public class GameWindowController implements GameObserver, MenuBarMainController {
+
+    public enum WindowType {
+        SINGLE_PLAYER,
+        MULTIPLAYER
+    }
 
     private ScoreTableController scoreTableCtr;
     private ChatController chatCtr;
@@ -53,7 +57,7 @@ public class GameWindowController implements GameObserver, MenuBarMainController
         historyCtr = new HistoryController(this);
         menuBarCtr = new MenuBarController(this, true);
         canvasCtr = new CanvasController(this);
-        buttonsCtr = new ButtonsController(this);
+        buttonsCtr = new ButtonsController(this, gameManager.thinkingTimeLimitExists());
     }
 
     @Override
@@ -67,13 +71,18 @@ public class GameWindowController implements GameObserver, MenuBarMainController
     }
 
     @Override
-    public void turnEnded(GameManager.TurnAction action, Player nextPlayer) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void turnEnded(GameManager.TurnAction action, Player player) {
+        update();
+    }
+
+    @Override
+    public void thinkingTimeOver(Player player) {
+
     }
 
     @Override
     public void localPlayerLeft(Player player) {
-
+        update();
     }
 
     @Override
@@ -89,12 +98,49 @@ public class GameWindowController implements GameObserver, MenuBarMainController
         });
     }
 
-    void mousePressedOnBoard(int row, int col) {
+    @Override
+    public void gameStarted(Player firstPlayer) {
+        update();
+    }
+
+    @Override
+    public void updateTimer(int remainingTime) {
+        Platform.runLater(() -> buttonsCtr.updateTimer(remainingTime));
+    }
+
+    @Override
+    public void thinkingTimeExtended(Player player) {
+
+    }
+
+    @Override
+    public String jokerLetterRequested(Player player) {
+        if (player == this.player) {
+            return AlertCreator.showChoiceDialog(StringConstants.CHOOSE_JOKER_LETTER_TITLE,
+                    StringConstants.CHOOSE_JOKER_LETTER_MSG, Letters.getLetters());
+        }
+        return null;
+    }
+
+    @Override
+    public void jokerLetterChosen(String letter, Player player) {
+        
+    }
+
+    void handleMousePressedOnBoard(int row, int col) {
         gameManager.alterBoard(row, col, player);
     }
 
-    void mousePressedOnTray(int index) {
-        player.alterTray(index);
+    void handleMousePressedOnTray(int index) {
+        gameManager.alterTray(index, player);
+    }
+
+    void handleWindowResized() {
+        canvasCtr.update(gameManager.getGameBoardTiles(), player.getTrayTiles(), player.getTileInHand());
+    }
+
+    void handleMouseMoved() {
+        canvasCtr.update(gameManager.getGameBoardTiles(), player.getTrayTiles(), player.getTileInHand());
     }
 
     @Override
@@ -105,67 +151,56 @@ public class GameWindowController implements GameObserver, MenuBarMainController
 
     @Override
     public void handleNewGameButton() {
-        
+
+    }
+
+    @Override
+    public void handleJoinButton() {
+
     }
 
     @Override
     public void handleLoadGameButton() {
-        
+
     }
 
     @Override
     public void handleSaveGameButton() {
-        
+
     }
 
     @Override
     public void handleDoneButton() {
-        if (gameManager.endTurn(GameManager.TurnAction.PLAY, player)) {
-            update();
-        }
+        gameManager.endTurn(GameManager.TurnAction.PLAY, player);
     }
 
     @Override
     public void handleRedrawButton() {
-        if (gameManager.endTurn(GameManager.TurnAction.SWAP, player)) {
-            update();
-        }
+        gameManager.endTurn(GameManager.TurnAction.SWAP, player);
     }
 
     @Override
     public void handlePassButton() {
-        if (gameManager.endTurn(GameManager.TurnAction.PASS, player)) {
-            update();
-        }
+        gameManager.endTurn(GameManager.TurnAction.PASS, player);
+    }
+
+    @Override
+    public void handleExtendButton() {
+        gameManager.extendThinkingTime(player);
     }
 
     @Override
     public void handleUndoButton() {
-        
+
     }
 
     @Override
     public void handleHelpButton() {
-        
+
     }
 
-//    @Override
-//    public void updateTileInHand(Tile tile) {
-//        canvasCtr.updateTileInHand(tile);
-//    }
-//
-//    @Override
-//    public void updateBoardTile(int row, int col, Tile tile) {
-//        canvasCtr.updateBoardTile(row, col, tile);
-//    }
-//
-//    @Override
-//    public void updateTrayTiles(int index, Tile tile) {
-//        canvasCtr.updateTrayTile(index, tile);
-//    }
-    public enum WindowType {
-        SINGLE_PLAYER,
-        MULTIPLAYER
+    void componentsLoaded() {
+        gameManager.gameWindowReady();
     }
 
     public ScoreTableController getScoreTableCtr() {
@@ -204,14 +239,15 @@ public class GameWindowController implements GameObserver, MenuBarMainController
         return player;
     }
 
-//    public void setPlayer(LocalHumanPlayer player) {
-//        this.player = player;
-//    }
-    
     private void update() {
-        canvasCtr.repaint();
-        scoreTableCtr.update();
-        historyCtr.update();
+        canvasCtr.update(gameManager.getGameBoardTiles(), player.getTrayTiles(), player.getTileInHand());
+        scoreTableCtr.update(gameManager.getPlayerNames(), gameManager.getPlayerScores());
+        historyCtr.update(gameManager.getPlayedWords());
+        buttonsCtr.updateButtons(
+                gameManager.playerCanEndTurn(player, GameManager.TurnAction.PLAY),
+                gameManager.playerCanEndTurn(player, GameManager.TurnAction.SWAP),
+                gameManager.playerCanEndTurn(player, GameManager.TurnAction.PASS),
+                gameManager.playerCanExtendTime(player));
     }
 
 }

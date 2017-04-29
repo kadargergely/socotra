@@ -30,7 +30,7 @@ public class Letters {
     private static final List<String> LETTERS = Arrays.asList("A", "Á", "B", "C", "CS", "D",
             "E", "É", "F", "G", "GY", "H", "I", "Í", "J", "K", "L", "LY", "M",
             "N", "NY", "O", "Ó", "Ö", "Ő", "P", "R", "S", "SZ", "T", "TY", "U",
-            "Ú", "Ü", "Ű", "V", "Z", "ZS", "_");
+            "Ú", "Ü", "Ű", "V", "Z", "ZS", "");
 
     private static final int VALUES[] = {1, 1, 2, 5, 7, 2, 1, 3, 4, 2, 4, 3,
         1, 5, 4, 1, 1, 8, 1, 1, 5, 1, 2, 4, 7, 4, 1, 1, 3, 1, 10, 4, 7, 4,
@@ -41,6 +41,7 @@ public class Letters {
         2, 1, 2, 2, 1, 2};
 
     public static final int JOKER_INDEX = LETTERS.size() - 1;
+    public static final String UNSPECIFIED_JOKER = LETTERS.get(JOKER_INDEX);
 
     /**
      * Return {@code true} if the alphabet contains the given letter.
@@ -49,7 +50,7 @@ public class Letters {
      * @return {@code true} if the alphabet contains the given letter
      */
     public static boolean isValid(String letter) {
-        return LETTERS.contains(letter);
+        return LETTERS.contains(letter.toUpperCase());
     }
 
     /**
@@ -61,7 +62,7 @@ public class Letters {
      * the alphabet
      */
     public static int getLetterNum(String letter) {
-        return LETTERS.indexOf(letter);
+        return LETTERS.indexOf(letter.toUpperCase());
     }
     
     /**
@@ -87,4 +88,7 @@ public class Letters {
         return tileList;
     }
 
+    public static List<String> getLetters() {
+        return LETTERS;
+    }
 }

@@ -29,32 +29,63 @@ public class SocotraAI implements GameObserver {
 
     @Override
     public void trayAltered(int index, Player player) {
-        
+
     }
 
     @Override
     public void boardAltered(int row, int col, Player player) {
-        
+
     }
 
     @Override
     public void turnEnded(GameManager.TurnAction action, Player player) {
-        
+
+    }
+
+    @Override
+    public void thinkingTimeOver(Player player) {
+
     }
 
     @Override
     public void localPlayerLeft(Player player) {
-        
+
     }
 
     @Override
     public void remotePlayerLeft(Player player) {
-        
+
     }
 
     @Override
     public void serverLeft() {
+
+    }
+
+    @Override
+    public void gameStarted(Player firstPlayer) {
+
+    }
+
+    @Override
+    public void updateTimer(int remainingTime) {
+
+    }
+
+    @Override
+    public void thinkingTimeExtended(Player player) {
+
+    }
+
+    @Override
+    public String jokerLetterRequested(Player player) {
+        return null;
+    }
+
+    @Override
+    public void jokerLetterChosen(String letter, Player player) {
         
     }
 
+    
 }

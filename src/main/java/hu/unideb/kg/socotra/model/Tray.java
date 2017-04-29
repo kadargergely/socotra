@@ -17,6 +17,8 @@
  */
 package hu.unideb.kg.socotra.model;
 
+import java.util.List;
+
 /**
  *
  * @author Gergely Kadar
@@ -99,6 +101,14 @@ public class Tray {
                 isPlace = true;
                 break;
             }
+        }
+        return isPlace;
+    }
+    
+    public boolean addTiles(List<Tile> tiles) {
+        boolean isPlace = true;
+        for (Tile tile : tiles) {
+            isPlace = addTile(tile);
         }
         return isPlace;
     }

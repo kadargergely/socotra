@@ -87,6 +87,7 @@ public class GameServer implements GameObserver, GameEndPoint {
 
             if (object instanceof NetworkManager.BoardAltered) {
                 NetworkManager.BoardAltered boardAltered = (NetworkManager.BoardAltered) object;
+                sendToAllExceptPlayer(boardAltered.PLAYER_NAME, boardAltered);
                 Player player = GameServer.this.players.getPlayerByName(boardAltered.PLAYER_NAME);
                 if (player != null && GameServer.this.gameManager != null) {
                     GameServer.this.gameManager.alterBoard(boardAltered.ROW, boardAltered.COL, player);
@@ -95,22 +96,34 @@ public class GameServer implements GameObserver, GameEndPoint {
             }
             if (object instanceof NetworkManager.TrayAltered) {
                 NetworkManager.TrayAltered trayAltered = (NetworkManager.TrayAltered) object;
+                sendToAllExceptPlayer(trayAltered.PLAYER_NAME, trayAltered);
                 Player player = GameServer.this.players.getPlayerByName(trayAltered.PLAYER_NAME);
                 if (player != null) {
-                    player.alterTray(trayAltered.INDEX);
+                    gameManager.alterTray(trayAltered.INDEX, player);
                 }
                 return;
             }
             if (object instanceof NetworkManager.TurnEnded) {
                 NetworkManager.TurnEnded turnEnded = (NetworkManager.TurnEnded) object;
+                sendToAllExceptPlayer(turnEnded.PLAYER_NAME, turnEnded);
                 Player player = GameServer.this.players.getPlayerByName(turnEnded.PLAYER_NAME);
                 if (player != null && GameServer.this.gameManager != null) {
                     GameServer.this.gameManager.endTurn(GameManager.TurnAction.valueOf(turnEnded.TURN_ACTION), player);
                 }
                 return;
             }
+            if (object instanceof NetworkManager.ThinkingTimeExtended) {
+                server.sendToAllExceptTCP(connection.getID(), object);
+                gameManager.extendThinkingTime(players.getPlayerByName(((NetworkManager.ThinkingTimeExtended) object).PLAYER_NAME));
+                return;
+            }
+            if (object instanceof NetworkManager.JokerLetterChosen) {
+                NetworkManager.JokerLetterChosen jokerLetterChosen = (NetworkManager.JokerLetterChosen) object;
+                players.getPlayerByName(jokerLetterChosen.PLAYER_NAME).getTileInHand().setJokerLetter(jokerLetterChosen.LETTER);
+                return;
+            }
         }
-        
+
         @Override
         public void disconnected(Connection c) {
             GameConnection connection = (GameConnection) c;
@@ -146,24 +159,44 @@ public class GameServer implements GameObserver, GameEndPoint {
 
     @Override
     public void trayAltered(int index, Player player) {
-        NetworkManager.TrayAltered trayAltered = new NetworkManager.TrayAltered();
-        trayAltered.INDEX = index;
-        sendToAllExceptPlayer(player.getName(), trayAltered);
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.TrayAltered trayAltered = new NetworkManager.TrayAltered();
+            trayAltered.PLAYER_NAME = player.getName();
+            trayAltered.INDEX = index;
+            sendToAllExceptPlayer(player.getName(), trayAltered);
+        }
     }
 
     @Override
     public void boardAltered(int row, int col, Player player) {
-        NetworkManager.BoardAltered boardAltered = new NetworkManager.BoardAltered();
-        boardAltered.ROW = row;
-        boardAltered.COL = col;
-        sendToAllExceptPlayer(player.getName(), boardAltered);
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.BoardAltered boardAltered = new NetworkManager.BoardAltered();
+            boardAltered.PLAYER_NAME = player.getName();
+            boardAltered.ROW = row;
+            boardAltered.COL = col;
+            sendToAllExceptPlayer(player.getName(), boardAltered);
+        }
     }
 
     @Override
     public void turnEnded(GameManager.TurnAction action, Player player) {
-        NetworkManager.TurnEnded turnEnded = new NetworkManager.TurnEnded();
-        turnEnded.TURN_ACTION = action.toString();
-        sendToAllExceptPlayer(player.getName(), turnEnded);
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.TurnEnded turnEnded = new NetworkManager.TurnEnded();
+            turnEnded.PLAYER_NAME = player.getName();
+            turnEnded.TURN_ACTION = action.toString();
+            sendToAllExceptPlayer(player.getName(), turnEnded);
+        }
+    }
+
+    @Override
+    public void thinkingTimeOver(Player player) {
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.TurnEnded turnEnded = new NetworkManager.TurnEnded();
+            turnEnded.PLAYER_NAME = player.getName();
+            turnEnded.TURN_ACTION = GameManager.TurnAction.PASS.toString();
+            server.sendToAllTCP(turnEnded);
+            gameManager.endTurn(GameManager.TurnAction.PASS, player);
+        }
     }
 
     @Override
@@ -173,12 +206,12 @@ public class GameServer implements GameObserver, GameEndPoint {
 
     @Override
     public void remotePlayerLeft(Player player) {
-        
+
     }
 
     @Override
     public void serverLeft() {
-        
+
     }
 
     public void startGame(long shuffleSeed) {
@@ -190,6 +223,36 @@ public class GameServer implements GameObserver, GameEndPoint {
     @Override
     public void playerLeft() {
         server.stop();
+    }
+
+    @Override
+    public void gameStarted(Player firstPlayer) {
+
+    }
+
+    @Override
+    public void updateTimer(int remainingTime) {
+
+    }
+
+    @Override
+    public void thinkingTimeExtended(Player player) {
+        NetworkManager.ThinkingTimeExtended thinkingTimeExtended = new NetworkManager.ThinkingTimeExtended();
+        thinkingTimeExtended.PLAYER_NAME = player.getName();
+        server.sendToAllTCP(thinkingTimeExtended);
+    }
+
+    @Override
+    public String jokerLetterRequested(Player player) {
+        return null;
+    }
+
+    @Override
+    public void jokerLetterChosen(String letter, Player player) {
+        NetworkManager.JokerLetterChosen jokerLetterChosen = new NetworkManager.JokerLetterChosen();
+        jokerLetterChosen.PLAYER_NAME = player.getName();
+        jokerLetterChosen.LETTER = letter;
+        server.sendToAllTCP(jokerLetterChosen);
     }
 
     @Override

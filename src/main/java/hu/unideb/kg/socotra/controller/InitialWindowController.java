@@ -17,69 +17,112 @@
  */
 package hu.unideb.kg.socotra.controller;
 
+import hu.unideb.kg.socotra.model.persistence.ServerDAOImpl;
+import hu.unideb.kg.socotra.util.AlertCreator;
+import hu.unideb.kg.socotra.util.StringConstants;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * @author gkadar
  */
 public class InitialWindowController implements MenuBarMainController {
-    
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitialWindowController.class);
+
     private MenuBarController menuBarCtr;
     private CanvasController canvasCtr;
+    private SocotraApp mainApp;
 
     public InitialWindowController(SocotraApp mainApp) {
+        this.mainApp = mainApp;
         this.menuBarCtr = new MenuBarController(this, false);
         this.canvasCtr = new CanvasController();
     }
 
     @Override
     public void handleExitButton() {
-        
+
     }
 
     @Override
     public void handleNewGameButton() {
-        
+        try {
+            String dictFile = "/hu_HU.dic";
+            InputStreamReader inputStream = new InputStreamReader(InitialWindowController.class.getResourceAsStream(dictFile), "UTF-8");
+            mainApp.showNewGameWindow(new NewGameController(mainApp, inputStream, new ServerDAOImpl()));
+        } catch (UnsupportedEncodingException e) {
+            AlertCreator.showErrorMessage(StringConstants.CANT_JOIN_ANY_GAME_TITLE, StringConstants.CANT_JOIN_ANY_GAME_DICT_ERR_MSG);
+            LOGGER.error("Failed to load dictionary file.", e);
+        } catch (IOException e) {
+            AlertCreator.showErrorMessage(StringConstants.CANT_JOIN_ANY_GAME_TITLE, StringConstants.CANT_JOIN_ANY_GAME_DICT_ERR_MSG);
+            LOGGER.error("Failed to load dictionary file.", e);
+        }
+    }
+
+    @Override
+    public void handleJoinButton() {
+        try {
+            String dictFile = "/hu_HU.dic";
+            InputStreamReader inputStream = new InputStreamReader(InitialWindowController.class.getResourceAsStream(dictFile), "UTF-8");
+            mainApp.showJoinServerWindow(new JoinServerController(mainApp, inputStream, new ServerDAOImpl()));
+        } catch (UnsupportedEncodingException e) {
+            AlertCreator.showErrorMessage(StringConstants.CANT_JOIN_ANY_GAME_TITLE, StringConstants.CANT_JOIN_ANY_GAME_DICT_ERR_MSG);
+            LOGGER.error("Failed to load dictionary file.", e);
+        } catch (IOException e) {
+            AlertCreator.showErrorMessage(StringConstants.CANT_JOIN_ANY_GAME_TITLE, StringConstants.CANT_JOIN_ANY_GAME_DICT_ERR_MSG);
+            LOGGER.error("Failed to load dictionary file.", e);
+        }
     }
 
     @Override
     public void handleLoadGameButton() {
-        
+
     }
 
     @Override
     public void handleSaveGameButton() {
-        
+
     }
 
     @Override
     public void handleDoneButton() {
-        
+
     }
 
     @Override
     public void handleRedrawButton() {
-        
+
     }
 
     @Override
     public void handlePassButton() {
+
+    }
+
+    @Override
+    public void handleExtendButton() {
         
     }
 
     @Override
     public void handleUndoButton() {
-        
+
     }
 
     @Override
     public void handleHelpButton() {
-        
+
     }
 
     MenuBarController getMenuBarController() {
         return this.menuBarCtr;
     }
-    
+
     CanvasController getCanvasController() {
         return this.canvasCtr;
     }

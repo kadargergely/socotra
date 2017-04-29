@@ -35,7 +35,17 @@ public interface GameObserver {
     
     public void serverLeft();
     
-//    public void gameStarted(long bagSeed);  
+    public void gameStarted(Player firstPlayer); 
+    
+    public void updateTimer(int remainingTime);
+    
+    public void thinkingTimeExtended(Player player);
+    
+    public void thinkingTimeOver(Player player);
+    
+    public String jokerLetterRequested(Player player);
+    
+    public void jokerLetterChosen(String letter, Player player);
     
 //    public void gameEnded();
 }

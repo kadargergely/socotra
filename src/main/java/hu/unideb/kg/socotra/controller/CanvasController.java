@@ -44,6 +44,9 @@ public class CanvasController {
     private final double BOARD_TOP_LEFT_Y = 0.0181818181818182;
     private final double TRAY_BACK_TOP_LEFT_X = 0.2781818181818182;
 
+    private static final double REL_TILE_S = 31.0 / 550.0;
+    private static final double REL_FIELD_S = 32.0 / 550.0;
+
     private Canvas canvas;
     private double mouseX;
     private double mouseY;
@@ -89,23 +92,27 @@ public class CanvasController {
     }
 
     private void onResize() {
-        tileSize = canvas.getWidth() * (31.0 / 550.0);
-        tileLetterFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), Math.round(tileSize * 0.7));
+        tileSize = canvas.getWidth() * REL_TILE_S;
+        tileLetterFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), Math.round(tileSize * 0.6));
         tileValueFont = Font.loadFont(this.getClass().getResource("/fonts/FrancoisOne.ttf").toString(), Math.round(tileSize * 0.3));
-        repaint();
+        if (mainCtr != null) {
+            mainCtr.handleWindowResized();
+        } else {
+            drawBackground();
+        }
     }
 
     private void onMousePressed(MouseEvent e) {
         if (mainCtr != null) {
             if (e.getX() > canvas.getWidth() * (35.0 / 550.0) && e.getX() < canvas.getWidth() * (515.0 / 550.0)
                     && e.getY() > canvas.getHeight() * (10.0 / 550.0) && e.getY() < canvas.getHeight() * (490.0 / 550.0)) {
-                int row = (int) (e.getY() - canvas.getHeight() * (10.0 / 550.0)) / 32;
-                int col = (int) (e.getX() - canvas.getWidth() * (35.0 / 550.0)) / 32;
-                mainCtr.mousePressedOnBoard(row, col);
+                int row = (int) (e.getY() - canvas.getHeight() * (10.0 / 550.0)) / (int) (canvas.getWidth() * REL_FIELD_S);
+                int col = (int) (e.getX() - canvas.getWidth() * (35.0 / 550.0)) / (int) (canvas.getWidth() * REL_FIELD_S);
+                mainCtr.handleMousePressedOnBoard(row, col);
             } else if (e.getX() > canvas.getWidth() * (163.0 / 550.0) && e.getX() < canvas.getWidth() * (387.0 / 550.0)
                     && e.getY() > canvas.getHeight() * (504.0 / 550.0) && e.getY() < canvas.getHeight() * (536.0 / 550.0)) {
-                int index = (int) (e.getX() - canvas.getWidth() * (163.0 / 550.0)) / 32;
-                mainCtr.mousePressedOnTray(index);
+                int index = (int) (e.getX() - canvas.getWidth() * (163.0 / 550.0)) / (int) (canvas.getWidth() * REL_FIELD_S);
+                mainCtr.handleMousePressedOnTray(index);
             }
         }
     }
@@ -113,18 +120,15 @@ public class CanvasController {
     private void onMouseMoved(MouseEvent e) {
         mouseX = e.getX();
         mouseY = e.getY();
-        repaint();
+        if (mainCtr != null) {
+            mainCtr.handleMouseMoved();
+        }
     }
 
-    public void repaint() {
-        // draw board
-        gc.drawImage(backgroundImage, 0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.setFill(Color.DARKGREEN);
-        gc.fillRect(canvas.getWidth() * (153.0 / 550.0), canvas.getHeight() * (494.0 / 550.0),
-                canvas.getWidth() * (244.0 / 550.0), canvas.getHeight() * (52.0 / 550.0));
+    public void update(Tile[][] boardTiles, Tile[] trayTiles, Tile tileInHand) {
+        drawBackground();
         if (mainCtr != null) {
             // draw tiles on board
-            Tile[][] boardTiles = mainCtr.getGameManager().getGameBoardTiles();
             for (int i = 0; i < boardTiles.length; i++) {
                 for (int j = 0; j < boardTiles[i].length; j++) {
                     if (boardTiles[i][j] != null) {
@@ -134,7 +138,6 @@ public class CanvasController {
                 }
             }
             // draw tiles on tray
-            Tile[] trayTiles = mainCtr.getPlayer().getTrayTiles();
             for (int i = 0; i < trayTiles.length; i++) {
                 if (trayTiles[i] != null) {
                     drawTile(trayTiles[i], canvas.getWidth() * (163.0 / 550.0) + i * canvas.getWidth() * (32.0 / 550.0),
@@ -142,12 +145,19 @@ public class CanvasController {
                 }
             }
             // draw tile in hand
-            Tile tileInHand = mainCtr.getPlayer().getTileInHand();
             if (tileInHand != null) {
                 drawTile(tileInHand, mouseX, mouseY);
             }
         }
 //        drawTile(new Tile("TY", 10), canvas.getWidth() * (35.0 / 550.0), canvas.getHeight() * (10.0 / 550.0));
+    }
+
+    public void drawBackground() {
+        // draw board
+        gc.drawImage(backgroundImage, 0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.setFill(Color.DARKGREEN);
+        gc.fillRect(canvas.getWidth() * (153.0 / 550.0), canvas.getHeight() * (494.0 / 550.0),
+                canvas.getWidth() * (244.0 / 550.0), canvas.getHeight() * (52.0 / 550.0));
     }
 
     public void setCanvas(Canvas canvas) {

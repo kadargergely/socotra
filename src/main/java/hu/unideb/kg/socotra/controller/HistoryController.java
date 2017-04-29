@@ -18,13 +18,14 @@
 package hu.unideb.kg.socotra.controller;
 
 import hu.unideb.kg.socotra.model.GameManager;
+import hu.unideb.kg.socotra.util.StringConstants;
 import java.util.List;
-import java.util.stream.Collectors;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -46,41 +47,73 @@ public class HistoryController {
     @FXML
     private TableColumn scoreColumn;
     
-    private class PlayedWord {
-        private final SimpleIntegerProperty TURN;
-        private final SimpleStringProperty PLAYER_NAME;
-        private final SimpleStringProperty WORD;
-        private final SimpleIntegerProperty SCORE;
+    public class PlayedWord {
+        private SimpleIntegerProperty turn;
+        private SimpleStringProperty playerName;
+        private SimpleStringProperty word;
+        private SimpleIntegerProperty score;
 
         public PlayedWord(int turn, String playerName, String word, int score) {
-            this.TURN = new SimpleIntegerProperty(turn);
-            this.PLAYER_NAME = new SimpleStringProperty(playerName);
-            this.WORD = new SimpleStringProperty(word);
-            this.SCORE = new SimpleIntegerProperty(score);
+            this.turn = new SimpleIntegerProperty(turn);
+            this.playerName = new SimpleStringProperty(playerName);
+            this.word = new SimpleStringProperty(word);
+            this.score = new SimpleIntegerProperty(score);
         }
         
         public PlayedWord(GameManager.PlayedWord playedWord) {
-            this.TURN = new SimpleIntegerProperty(playedWord.TURN);
-            this.PLAYER_NAME = new SimpleStringProperty(playedWord.PLAYER_NAME);
-            this.WORD = new SimpleStringProperty(playedWord.WORD);
-            this.SCORE = new SimpleIntegerProperty(playedWord.SCORE);
+            this.turn = new SimpleIntegerProperty(playedWord.getTurn());
+            this.playerName = new SimpleStringProperty(playedWord.getPlayerName());
+            this.word = new SimpleStringProperty(playedWord.getWord());
+            this.score = new SimpleIntegerProperty(playedWord.getScore());
         }
 
         public int getTurn() {
-            return TURN.get();
+            return turn.get();
+        }
+        
+        public void setTurn(int turn) {
+            this.turn.set(turn);
         }
 
         public String getPlayerName() {
-            return PLAYER_NAME.get();
+            return playerName.get();
+        }
+        
+        public void setPlayerName(String name) {
+            this.playerName.set(name);
         }
 
         public String getWord() {
-            return WORD.get();
+            return word.get();
+        }
+        
+        public void setWord(String word) {
+            this.word.set(word);
         }
 
         public int getScore() {
-            return SCORE.get();
-        }        
+            return score.get();
+        }
+        
+        public void setScore(int score) {
+            this.score.set(score);
+        }
+        
+        public SimpleIntegerProperty turnProperty() {
+            return this.turn;
+        }
+        
+        public SimpleStringProperty playerNameProperty() {
+            return this.playerName;
+        }
+        
+        public SimpleStringProperty wordProperty() {
+            return this.word;
+        }
+        
+        public SimpleIntegerProperty scoreProperty() {
+            return this.score;
+        }
     }
     
     private GameWindowController mainCtr;
@@ -92,20 +125,27 @@ public class HistoryController {
     
     @FXML
     private void initialize() {
-        turnColumn.setCellValueFactory(new PropertyValueFactory<>("round"));
+        turnColumn.setCellValueFactory(new PropertyValueFactory<>("turn"));
         playerColumn.setCellValueFactory(new PropertyValueFactory<>("playerName"));
         wordColumn.setCellValueFactory(new PropertyValueFactory<>("word"));
         scoreColumn.setCellValueFactory(new PropertyValueFactory<>("score"));
         
         tableData = FXCollections.observableArrayList();
         historyTable.setItems(tableData);
+        historyTable.setPlaceholder(new Label(StringConstants.NO_WORDS_PLAYED_YET));
     }
     
-    public void update() {
-        List<GameManager.PlayedWord> currentPlayedWords = mainCtr.getGameManager().getPlayedWords();
-        int lastAddedRound = tableData.size();
-        currentPlayedWords.stream().filter(pw -> pw.TURN > lastAddedRound).forEach(pw -> {
-            tableData.add(new PlayedWord(pw));
-        });
+    public void update(List<GameManager.PlayedWord> currentPlayedWords) {
+        if (currentPlayedWords.size() < tableData.size()) {
+            for (int i = currentPlayedWords.size(); i < tableData.size(); i++) {
+                tableData.remove(i);
+            }
+        } else if (currentPlayedWords.size() == tableData.size() && currentPlayedWords.size() > 0) {
+            tableData.set(tableData.size() - 1, new PlayedWord(currentPlayedWords.get(currentPlayedWords.size() - 1)));
+        } else {
+            for (int i = tableData.size(); i < currentPlayedWords.size(); i++) {
+                tableData.add(new PlayedWord(currentPlayedWords.get(i)));
+            }
+        }
     }
 }

@@ -15,6 +15,12 @@
                   <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                </accelerator>
             </MenuItem>
+            <MenuItem fx:id="joinMenuItem" mnemonicParsing="false" onAction="#joinPressed" text="Csatlakozás játékhoz...">
+               <accelerator>
+                  <KeyCodeCombination alt="UP" code="J" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+               </accelerator>
+            </MenuItem>
+            <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem fx:id="saveGameMenuItem" mnemonicParsing="false" onAction="#saveGamePressed" text="Játék mentése...">
                <accelerator>
                   <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
@@ -25,6 +31,7 @@
                   <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                </accelerator>
             </MenuItem>
+            <SeparatorMenuItem mnemonicParsing="false" />
         <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitPressed" text="Kilépés">
                <accelerator>
                   <KeyCodeCombination alt="DOWN" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />

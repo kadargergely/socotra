@@ -29,16 +29,15 @@ public class Tile {
 
     private String jokerLetter;
 
-    public Tile(String letter, int value) {
-        this.LETTER = letter;
-        this.JOKER = false;
-        this.VALUE = value;
+    public Tile(String letter, int value) {        
+        this(letter, value, false);
     }
 
     public Tile(String letter, int value, boolean joker) {
         this.LETTER = letter;
         this.VALUE = value;
         this.JOKER = joker;
+        this.jokerLetter = Letters.UNSPECIFIED_JOKER;
     }
 
     public String getLetter() {
@@ -49,12 +48,22 @@ public class Tile {
         return JOKER;
     }
 
+    public boolean jokerLetterSpecified() {
+        return !jokerLetter.equals(Letters.UNSPECIFIED_JOKER);
+    }
+
+    public void resetJokerLetter() {
+        this.jokerLetter = Letters.UNSPECIFIED_JOKER;
+    }
+
     public int getValue() {
         return VALUE;
     }
 
     public void setJokerLetter(String letter) {
-        this.jokerLetter = letter;
+        if (Letters.isValid(letter)) {
+            this.jokerLetter = letter;            
+        }
     }
 
 }

@@ -53,19 +53,15 @@ public class AddPlayerController {
     private NewGameController mainCtr;
 
     private ObservableList<String> choiceBoxItems;
-    private boolean multiplayer;
 
-    public AddPlayerController(NewGameController ctr, boolean multiplayer, boolean localHuman) {
+    public AddPlayerController(NewGameController ctr, boolean localHuman) {
         this.mainCtr = ctr;
         choiceBoxItems = FXCollections.observableArrayList();
         if (!localHuman) {
             choiceBoxItems.add(StringConstants.LOCAL_PLAYER);
         }
         choiceBoxItems.add(StringConstants.COMPUTER);
-        if (multiplayer) {
-            choiceBoxItems.add(StringConstants.REMOTE_PLAYER);
-        }
-        this.multiplayer = multiplayer;
+        choiceBoxItems.add(StringConstants.REMOTE_PLAYER);        
     }
 
     @FXML
@@ -76,27 +72,27 @@ public class AddPlayerController {
             Stage stage = (Stage) passwordLabel.getScene().getWindow();
             String oldValue = (String) oldVal;
             String newValue = (String) newVal;
-            if (newVal.equals(StringConstants.REMOTE_PLAYER)) {
+            if (newValue.equals(StringConstants.REMOTE_PLAYER)) {
                 playerNameField.setText("<" + StringConstants.REMOTE_PLAYER + ">");
-                if (multiplayer && oldVal.equals(StringConstants.LOCAL_PLAYER)) {
+                if (oldValue.equals(StringConstants.LOCAL_PLAYER)) {
                     stage.setHeight(stage.getHeight() - 30);
                 }
-            } else if (((String) newVal).equals(StringConstants.LOCAL_PLAYER)) {
+            } else if (newValue.equals(StringConstants.LOCAL_PLAYER)) {
                 playerNameField.setText("");
-                if (multiplayer && !oldVal.equals(StringConstants.LOCAL_PLAYER)) {
+                if (!oldValue.equals(StringConstants.LOCAL_PLAYER)) {
                     stage.setHeight(stage.getHeight() + 30);
                 }
             } else {
                 playerNameField.setText("");
-                if (multiplayer && oldVal.equals(StringConstants.LOCAL_PLAYER)) {
+                if (oldValue.equals(StringConstants.LOCAL_PLAYER)) {
                     stage.setHeight(stage.getHeight() - 30);
                 }
             }
-            playerNameField.setDisable(((String) newVal).equals(StringConstants.REMOTE_PLAYER));
-            passwordLabel.setVisible(multiplayer && ((String) newVal).equals(StringConstants.LOCAL_PLAYER));
-            passwordField.setVisible(multiplayer && ((String) newVal).equals(StringConstants.LOCAL_PLAYER));
+            playerNameField.setDisable(newValue.equals(StringConstants.REMOTE_PLAYER));
+            passwordLabel.setVisible(newValue.equals(StringConstants.LOCAL_PLAYER));
+            passwordField.setVisible(newValue.equals(StringConstants.LOCAL_PLAYER));
         });
-        if (playerTypeChoiceBox.getValue().equals(StringConstants.COMPUTER) || !multiplayer) {
+        if (playerTypeChoiceBox.getValue().equals(StringConstants.COMPUTER)) {
             passwordLabel.setVisible(false);
             passwordField.setVisible(false);
         }
@@ -134,8 +130,8 @@ public class AddPlayerController {
             okPressed();
         }
     }
-    
+
     private void setDialogLayout(String playerType) {
-        
+
     }
 }

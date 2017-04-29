@@ -17,8 +17,10 @@
  */
 package hu.unideb.kg.socotra.util;
 
+import java.util.List;
 import java.util.Optional;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
 
 /**
@@ -40,6 +42,19 @@ public class AlertCreator {
 
     public static String showInputDialog(String title, String text) {
         TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(title);
+        dialog.setHeaderText(null);
+        dialog.setContentText(text);
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            return result.get();
+        } else {
+            return null;
+        }
+    }
+    
+    public static String showChoiceDialog(String title, String text, List<String> choices) {        
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
         dialog.setTitle(title);
         dialog.setHeaderText(null);
         dialog.setContentText(text);

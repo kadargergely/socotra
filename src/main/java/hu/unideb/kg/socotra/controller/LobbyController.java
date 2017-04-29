@@ -163,7 +163,7 @@ public class LobbyController {
             tableData.add(new PlayerInGame("<" + StringConstants.REMOTE_PLAYER + ">", StringConstants.REMOTE_PLAYER, StringConstants.WAITING_FOR_PLAYER));
         }
 
-//        startButton.setDisable(true);
+        startButton.setDisable(true);
 //        mainApp.getPrimaryStage().setOnCloseRequest((WindowEvent event) -> {
 //            exitPressed();
 //        });
@@ -174,7 +174,7 @@ public class LobbyController {
         endPoint.playerLeft();
         try {
             if (serverLobby) {
-                serverDAO.setServerStatus(serverToConnect, ServerEntity.ServerState.CLOSED);
+                serverDAO.removeServer(serverToConnect);
             }
         } catch (DBConnectionException e) {
             LOGGER.warn("Failed to set server status to CLOSED.", e);
@@ -184,9 +184,9 @@ public class LobbyController {
 
     // only the server lobby ever needs to handle this event as the clients can't press the start button
     @FXML
-    private void startPressed() {        
+    private void startPressed() {
         try {
-            serverDAO.setServerStatus(serverToConnect, ServerEntity.ServerState.STARTED);
+            serverDAO.removeServer(serverToConnect);
             long shuffleSeed = System.currentTimeMillis();
             // we are confident, that our endPoint is a GameServer
             ((GameServer) endPoint).startGame(shuffleSeed);
@@ -196,12 +196,16 @@ public class LobbyController {
             AlertCreator.showErrorMessage(StringConstants.FAILED_TO_START_GAME_DB_ISSUE_TITLE, StringConstants.FAILED_TO_START_GAME_DB_ISSUE_MSG);
         }
     }
-    
+
     // common operations for both the server and the client
     public void startGame(long shuffleSeed) {
         endPoint.switchToGameListener();
         gameInitializer.initializeGame(mainApp, shuffleSeed);
-        Platform.runLater(() -> mainApp.showGameWindow(gameInitializer.getGameWindowController(), GameWindowController.WindowType.MULTIPLAYER));        
+        Platform.runLater(() -> {
+            Stage stage = (Stage) startButton.getScene().getWindow();
+            stage.close();
+            mainApp.showGameWindow(gameInitializer.getGameWindowController(), GameWindowController.WindowType.MULTIPLAYER);
+        });
     }
 
     public void addRemotePlayerToGame(String playerName) {
@@ -304,7 +308,7 @@ public class LobbyController {
     private void setStartButtonAvailability() {
         if (serverLobby) {
             boolean allConnected = !tableData.stream().filter(p -> p.getStatus().equals(StringConstants.WAITING_FOR_PLAYER)).findAny().isPresent();
-//            startButton.setDisable(!allConnected);
+            startButton.setDisable(!allConnected);
         }
     }
 }

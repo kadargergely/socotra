@@ -34,26 +34,64 @@ public class ButtonsController {
     @FXML
     private Button passButton;
     @FXML
+    private Button extendButton;
+    @FXML
     private Label timerLabel;
-    
+
     private final GameWindowController mainCtr;
-    
-    public ButtonsController(GameWindowController ctr) {
+
+    private boolean timeLimitExists;
+
+    public ButtonsController(GameWindowController ctr, boolean timeLimitExists) {
         this.mainCtr = ctr;
+        this.timeLimitExists = timeLimitExists;
     }
-    
+
+    @FXML
+    private void initialize() {
+        timerLabel.setVisible(timeLimitExists);
+        extendButton.setVisible(timeLimitExists);
+    }
+
     @FXML
     private void doneButtonClicked() {
         mainCtr.handleDoneButton();
     }
-    
+
     @FXML
     private void redrawButtonClicked() {
         mainCtr.handleRedrawButton();
     }
-    
+
     @FXML
     private void passButtonClicked() {
         mainCtr.handlePassButton();
+    }
+
+    @FXML
+    private void extendButtonClicked() {
+        mainCtr.handleExtendButton();
+    }
+
+    public void updateTimer(int remainingTime) {
+        if (timerLabel != null) {
+            String minutes = String.valueOf(remainingTime / 60);
+            String seconds = remainingTime % 60 >= 10 ? String.valueOf(remainingTime % 60) : "0" + String.valueOf(remainingTime % 60);
+            timerLabel.setText(minutes + ":" + seconds);
+        }
+    }
+
+    public void disableButtonBasedOnTurn(boolean playersTurn) {
+        doneButton.setDisable(!playersTurn);
+        redrawButton.setDisable(!playersTurn);
+        passButton.setDisable(!playersTurn);
+        extendButton.setDisable(!playersTurn);
+    }   
+
+    void updateButtons(boolean playerCanPlay, boolean playerCanSwap, boolean playerCanPass, boolean playerCanExtendTime) {
+        doneButton.setDisable(!playerCanPlay);
+        redrawButton.setDisable(!playerCanSwap);
+        passButton.setDisable(!playerCanPass);
+        extendButton.setDisable(!playerCanExtendTime);
     }
 }

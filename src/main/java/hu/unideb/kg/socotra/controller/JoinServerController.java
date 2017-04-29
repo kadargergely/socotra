@@ -38,6 +38,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javax.persistence.NoResultException;
 
 /**
  *
@@ -144,7 +145,7 @@ public class JoinServerController {
     private ServerDAO serverDAO;
     private GameInitializer gameInitializer;
 
-    public JoinServerController(SocotraApp mainApp, InputStreamReader inputStream, ServerDAO serverDAO) 
+    public JoinServerController(SocotraApp mainApp, InputStreamReader inputStream, ServerDAO serverDAO)
             throws IOException {
         this.mainApp = mainApp;
         this.serverDAO = serverDAO;
@@ -173,7 +174,7 @@ public class JoinServerController {
                 connectButton.setDisable(false);
             }
         });
-        
+
         connectButton.setDisable(true);
 
         refreshAvailableServersList();
@@ -238,19 +239,17 @@ public class JoinServerController {
 
     @FXML
     private void addServerButtonPressed() {
-        String ipAddress = AlertCreator.showInputDialog(StringConstants.ADD_SERVER_TITLE, StringConstants.ADD_SERVER_TEXT);
-        if (ipAddress != null) {
+        String serverName = AlertCreator.showInputDialog(StringConstants.ADD_SERVER_TITLE, StringConstants.ADD_SERVER_TEXT);        
+        if (serverName != null) {
             try {
-                List<ServerEntity> servers = serverDAO.getServersByIp(ipAddress);
-                if (servers.isEmpty()) {
-                    AlertCreator.showErrorMessage(StringConstants.NO_SERVERS_AT_IP_TITLE, StringConstants.NO_SERVERS_AT_IP_MSG);
+                ServerEntity server = serverDAO.getServerByName(serverName);
+                if (server != null && server.getPrivateServer()) {
+                    serverEntities.add(server);
+                    availableServers.add(serverEntityToAvailableServer(server));
                 } else {
-                    for (ServerEntity server : servers) {
-                        serverEntities.add(server);
-                        availableServers.add(serverEntityToAvailableServer(server));
-                    }
+                    AlertCreator.showErrorMessage(StringConstants.PRIVATE_SERVER_DOESNT_EXIST_TITLE, StringConstants.PRIVATE_SERVER_DOESNT_EXIST_MSG);
                 }
-            } catch (DBConnectionException ex) {
+            } catch (DBConnectionException e) {
                 AlertCreator.showErrorMessage(StringConstants.FAILED_TO_GET_SERVERS_TITLE, StringConstants.FAILED_TO_GET_SERVERS_MSG);
             }
         }
@@ -263,7 +262,7 @@ public class JoinServerController {
             ServerEntity selectedServerRefreshed = serverDAO.getServerByName(availableServers.get(selectedServerIndex).getName());
             availableServers.set(selectedServerIndex, serverEntityToAvailableServer(selectedServerRefreshed));
             setServerData(selectedServerRefreshed);
-            if (selectedServerRefreshed.getAvailablePlaces() > 0 && selectedServerRefreshed.getServerState() == ServerEntity.ServerState.LOBBY) {
+            if (selectedServerRefreshed != null && selectedServerRefreshed.getAvailablePlaces() > 0) {
                 serverDAO.decrementAvailablePlaces(selectedServerRefreshed);
                 selectedServerRefreshed = serverDAO.getServerByName(selectedServerRefreshed.getName());
                 ChoosePlayerController choosePlayerCtr = new ChoosePlayerController(mainApp, serverDAO, selectedServerRefreshed, gameInitializer);

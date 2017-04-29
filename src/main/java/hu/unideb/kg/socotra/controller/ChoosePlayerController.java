@@ -65,7 +65,7 @@ public class ChoosePlayerController {
     private ServerEntity serverToConnect;
     private ServerDAO serverDAO;
 
-    private ObservableList<String> choiceBoxItems;    
+    private ObservableList<String> choiceBoxItems;
 
     public ChoosePlayerController(SocotraApp mainApp, ServerDAO serverDAO, ServerEntity serverToConnect, GameInitializer gameInitializer) {
         this.mainApp = mainApp;
@@ -139,9 +139,14 @@ public class ChoosePlayerController {
                                 player.getType() == PlayerEntity.PlayerType.HUMAN ? Player.PlayerType.REMOTE : Player.PlayerType.COMPUTER);
                     }
                 }
-            }            
+            }
+            // add thinking time constraints to the game
+            if (serverToConnect.getThinkingTime() != null) {
+                gameInitializer.setThinkingTimeConstraints(serverToConnect.getThinkingTime(), 
+                        serverToConnect.getTimeExtensions(), serverToConnect.getTimeExtensionsLength());
+            }
             // create client endpoint
-            LobbyController lobbyController = new LobbyController(mainApp, gameInitializer, serverDAO, serverToConnect);            
+            LobbyController lobbyController = new LobbyController(mainApp, gameInitializer, serverDAO, serverToConnect);
             gameInitializer.createClient(serverToConnect.getIpAddress(),
                     serverToConnect.getPort() != null ? serverToConnect.getPort() : NetworkManager.DEFAULT_PORT, lobbyController);
             mainApp.showLobbyWindow(lobbyController);
@@ -151,7 +156,7 @@ public class ChoosePlayerController {
             AlertCreator.showErrorMessage(StringConstants.FAILED_TO_JOIN_SERVER_TITLE, StringConstants.FAILED_TO_JOIN_SERVER_MSG);
         }
     }
-    
+
     @FXML
     private void cancelPressed() {
         try {
@@ -162,7 +167,7 @@ public class ChoosePlayerController {
             Logger.getLogger(ChoosePlayerController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     @FXML
     private void nameFieldKeyPressed(KeyEvent e) {
         if (e.getCode() == KeyCode.ENTER) {

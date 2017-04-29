@@ -63,8 +63,19 @@ public class NetworkManager {
     }
 
     public static class PlayerLeft {
+
+        public String PLAYER_NAME;
+    }
+
+    public static class ThinkingTimeExtended {
+
+        public String PLAYER_NAME;
+    }
+    
+    public static class JokerLetterChosen {
         
         public String PLAYER_NAME;
+        public String LETTER;
     }
 
     public static void register(EndPoint endPoint) {
@@ -75,5 +86,7 @@ public class NetworkManager {
         kryo.register(GameStarted.class);
         kryo.register(RegisterPlayer.class);
         kryo.register(PlayerLeft.class);
+        kryo.register(ThinkingTimeExtended.class);
+        kryo.register(JokerLetterChosen.class);
     }
 }

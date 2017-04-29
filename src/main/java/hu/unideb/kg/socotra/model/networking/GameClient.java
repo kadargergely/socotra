@@ -44,7 +44,6 @@ public class GameClient implements GameObserver, GameEndPoint {
     private LobbyController lobbyController;
     private LobbyListener lobbyListener;
     private GameListener gameListener;
-    private String playerName;
     private Players players;
 
     private static final int TIMEOUT = 5000;
@@ -57,23 +56,24 @@ public class GameClient implements GameObserver, GameEndPoint {
         @Override
         public void connected(Connection connection) {
             NetworkManager.RegisterPlayer registerPlayer = new NetworkManager.RegisterPlayer();
-            registerPlayer.PLAYER_NAME = playerName;
+            registerPlayer.PLAYER_NAME = players.getLocalPlayerName();
             client.sendTCP(registerPlayer);
         }
 
         @Override
         public void received(Connection connection, Object object) {
-            Player player = players.getPlayerByName(playerName);
-
             if (object instanceof NetworkManager.RegisterPlayer) {
                 String newPlayerName = ((NetworkManager.RegisterPlayer) object).PLAYER_NAME;
                 lobbyController.addRemotePlayerToGame(newPlayerName);
+                return;
             }
             if (object instanceof NetworkManager.PlayerLeft) {
                 lobbyController.removeRemotePlayerFromGame(((NetworkManager.PlayerLeft) object).PLAYER_NAME);
+                return;
             }
             if (object instanceof NetworkManager.GameStarted) {
                 lobbyController.startGame(((NetworkManager.GameStarted) object).SHUFFLE_SEED);
+                return;
             }
         }
 
@@ -112,6 +112,32 @@ public class GameClient implements GameObserver, GameEndPoint {
         public void received(Connection connection, Object object) {
             if (object instanceof NetworkManager.PlayerLeft) {
                 gameManager.remotePlayerLeft(GameClient.this.players.getPlayerByName(((NetworkManager.PlayerLeft) object).PLAYER_NAME));
+                return;
+            }
+            if (object instanceof NetworkManager.ThinkingTimeExtended) {
+                NetworkManager.ThinkingTimeExtended thinkingTimeExtended = (NetworkManager.ThinkingTimeExtended) object;
+                gameManager.extendThinkingTime(players.getPlayerByName(thinkingTimeExtended.PLAYER_NAME));
+                return;
+            }
+            if (object instanceof NetworkManager.BoardAltered) {
+                NetworkManager.BoardAltered boardAltered = (NetworkManager.BoardAltered) object;
+                gameManager.alterBoard(boardAltered.ROW, boardAltered.COL, players.getPlayerByName(boardAltered.PLAYER_NAME));
+                return;
+            }
+            if (object instanceof NetworkManager.TrayAltered) {
+                NetworkManager.TrayAltered trayAltered = (NetworkManager.TrayAltered) object;
+                gameManager.alterTray(trayAltered.INDEX, players.getPlayerByName(trayAltered.PLAYER_NAME));
+                return;
+            }
+            if (object instanceof NetworkManager.TurnEnded) {
+                NetworkManager.TurnEnded turnEnded = (NetworkManager.TurnEnded) object;
+                gameManager.endTurn(GameManager.TurnAction.valueOf(turnEnded.TURN_ACTION), players.getPlayerByName(turnEnded.PLAYER_NAME));
+                return;
+            }
+            if (object instanceof NetworkManager.JokerLetterChosen) {
+                NetworkManager.JokerLetterChosen jokerLetterChosen = (NetworkManager.JokerLetterChosen) object;
+                players.getPlayerByName(jokerLetterChosen.PLAYER_NAME).getTileInHand().setJokerLetter(jokerLetterChosen.LETTER);
+                return;
             }
         }
 
@@ -133,13 +159,6 @@ public class GameClient implements GameObserver, GameEndPoint {
         this.lobbyListener = new LobbyListener();
         this.gameListener = new GameListener();
 
-        for (Player player : players.getPlayersList()) {
-            if (player.getPlayerType() == Player.PlayerType.HUMAN) {
-                playerName = player.getName();
-                break;
-            }
-        }
-
         NetworkManager.register(client);
 
         client.addListener(lobbyListener);
@@ -153,22 +172,61 @@ public class GameClient implements GameObserver, GameEndPoint {
 //                throw new IOException(e);
             }
         }).start();
-
     }
 
     @Override
     public void boardAltered(int row, int col, Player player) {
-        
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.BoardAltered boardAltered = new NetworkManager.BoardAltered();
+            boardAltered.PLAYER_NAME = player.getName();
+            boardAltered.ROW = row;
+            boardAltered.COL = col;
+            client.sendTCP(boardAltered);
+        }
     }
 
     @Override
     public void trayAltered(int index, Player player) {
-        
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.TrayAltered trayAltered = new NetworkManager.TrayAltered();
+            trayAltered.PLAYER_NAME = player.getName();
+            trayAltered.INDEX = index;
+            client.sendTCP(trayAltered);
+        }
     }
 
     @Override
     public void turnEnded(GameManager.TurnAction action, Player player) {
-        
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.TurnEnded turnEnded = new NetworkManager.TurnEnded();
+            turnEnded.PLAYER_NAME = player.getName();
+            turnEnded.TURN_ACTION = action.toString();
+            client.sendTCP(turnEnded);
+        }
+    }
+
+    @Override
+    public void thinkingTimeOver(Player player) {
+        if (player.getName().equals(players.getLocalPlayerName())) {
+            NetworkManager.TurnEnded turnEnded = new NetworkManager.TurnEnded();
+            turnEnded.PLAYER_NAME = player.getName();
+            turnEnded.TURN_ACTION = GameManager.TurnAction.PASS.toString();
+            client.sendTCP(turnEnded);
+            gameManager.endTurn(GameManager.TurnAction.PASS, player);
+        }
+    }
+
+    @Override
+    public String jokerLetterRequested(Player player) {
+        return null;
+    }
+
+    @Override
+    public void jokerLetterChosen(String letter, Player player) {
+        NetworkManager.JokerLetterChosen jokerLetterChosen = new NetworkManager.JokerLetterChosen();
+        jokerLetterChosen.PLAYER_NAME = player.getName();
+        jokerLetterChosen.LETTER = letter;
+        client.sendTCP(jokerLetterChosen);
     }
 
     @Override
@@ -178,17 +236,34 @@ public class GameClient implements GameObserver, GameEndPoint {
 
     @Override
     public void remotePlayerLeft(Player player) {
-        
+
     }
 
     @Override
     public void serverLeft() {
-        
+
     }
 
     @Override
     public void playerLeft() {
         client.stop();
+    }
+
+    @Override
+    public void gameStarted(Player firstPlayer) {
+
+    }
+
+    @Override
+    public void updateTimer(int remainingTime) {
+
+    }
+
+    @Override
+    public void thinkingTimeExtended(Player player) {
+        NetworkManager.ThinkingTimeExtended thinkingTimeExtended = new NetworkManager.ThinkingTimeExtended();
+        thinkingTimeExtended.PLAYER_NAME = player.getName();
+        client.sendTCP(thinkingTimeExtended);
     }
 
     @Override

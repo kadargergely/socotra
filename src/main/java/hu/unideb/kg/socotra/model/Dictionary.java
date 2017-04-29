@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The <code>Dictionary</code> class wraps a list of {@link DictWord} objects containing the words
@@ -33,6 +35,8 @@ import java.util.Scanner;
  *
  */
 public class Dictionary {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(Dictionary.class);
 
     private final List<DictWord> DICTIONARY = new ArrayList<>();
 
@@ -58,8 +62,12 @@ public class Dictionary {
             }
 
             Collections.sort(DICTIONARY, 
-                    (DictWord o1, DictWord o2) -> Integer.compare(o1.getWord().length(), 
-                            o2.getWord().length()));
+                    (o1, o2) -> Integer.compare(o1.getWord().length(), 
+                            o2.getWord().length()));            
+            
+            for (int i = 300; i < 350; i++) {
+                LOGGER.trace(DICTIONARY.get(i).getWord());
+            }
         }
     }
     
@@ -91,6 +99,8 @@ public class Dictionary {
      *         <code>false</code> otherwise
      */
     public boolean isCorrect(String word) {
-        return DICTIONARY.stream().anyMatch((dword) -> (dword.equals(word.toLowerCase())));
+        boolean correct = DICTIONARY.stream().anyMatch(dword -> dword.equals(word.toLowerCase()));
+        LOGGER.trace(word + " correct: " + correct);
+        return correct;
     }
 }

@@ -31,6 +31,8 @@ public class Player {
     private Tile tileInHand;
     private PlayerType playerType;
     private Tray tray;
+    private boolean timeExtendedCurrentTurn;
+    private int timeExtensions;
 
     public enum PlayerType {
         HUMAN,
@@ -137,6 +139,10 @@ public class Player {
         }
         newTiles.forEach(tile -> tray.addTile(tile));
     }
+    
+    public void addTilesToTray(List<Tile> tiles) {
+        tray.addTiles(tiles);
+    }
 
     /**
      * Returns the name of the player.
@@ -210,5 +216,18 @@ public class Player {
     public PlayerType getPlayerType() {
         return playerType;
     }
+
+    public boolean isTimeExtendedCurrentTurn() {
+        return timeExtendedCurrentTurn;
+    }    
+
+    public int getTimeExtensions() {
+        return timeExtensions;
+    }
+
+    public void timeExtended() {
+        timeExtendedCurrentTurn = true;
+        timeExtensions++;        
+    }   
 
 }

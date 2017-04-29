@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The {@code Gameboard} class represents the board on which the players place their tiles. An
- * instance of this class stores informations about its fields in a tow dimensional array of
- * {@link Field} objects and about how many tiles were placed on it in the current turn. The methods
- * of this class are essential pieces of the games logic, like testing if the tiles were placed
- * correctly on the board, spell checking the words, calculating the points scored in the current
- * turn.
+ * The {@code Gameboard} class represents the board on which the players place their tiles. An instance of this class
+ * stores informations about its fields in a tow dimensional array of {@link Field} objects and about how many tiles
+ * were placed on it in the current turn. The methods of this class are essential pieces of the games logic, like
+ * testing if the tiles were placed correctly on the board, spell checking the words, calculating the points scored in
+ * the current turn.
  *
  * @author Gergely Kadar
  */
@@ -46,8 +45,8 @@ public class GameBoard {
     private int movableTiles;
 
     /**
-     * Constructs a <code>Gameboard</code> object and initializes its two dimensional array of
-     * <code>Field</code> objects.
+     * Constructs a <code>Gameboard</code> object and initializes its two dimensional array of <code>Field</code>
+     * objects.
      */
     public GameBoard() {
         board = new Field[BOARD_SIZE][BOARD_SIZE];
@@ -132,8 +131,8 @@ public class GameBoard {
     }
 
     /**
-     * Constructs a new {@code Gameboard} object and initializes it with a two dimensional array of
-     * {@code Field} objects.
+     * Constructs a new {@code Gameboard} object and initializes it with a two dimensional array of {@code Field}
+     * objects.
      *
      * @param fields the fields of the new {@code Gameboard} object
      */
@@ -155,8 +154,7 @@ public class GameBoard {
      * @param row the row index where the tile should be placed
      * @param col the column index where the tile should be placed
      * @param tile the tile to be placed on the board
-     * @return <code>true</code> if the tile has been successfully placed on the board,
-     * <code>false</code> otherwise
+     * @return <code>true</code> if the tile has been successfully placed on the board, <code>false</code> otherwise
      */
     public boolean setTile(int row, int col, Tile tile) {
         if (board[row][col].getStatus() == Field.Status.EMPTY) {
@@ -170,8 +168,8 @@ public class GameBoard {
     }
 
     /**
-     * Returns the {@code Tile} object of the field with the given row and column indices, if the
-     * tile is movable, and sets its value to {@code null}.
+     * Returns the {@code Tile} object of the field with the given row and column indices, if the tile is movable, and
+     * sets its value to {@code null}.
      *
      * @param row the row index from where the tile should be removed
      * @param col the column index from where the tile should be removed
@@ -188,15 +186,25 @@ public class GameBoard {
             return null;
         }
     }
+    
+    public List<Tile> pickUpMovableTiles() {
+        List<Tile> pickedUpMovableTiles = new ArrayList<>();
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[i].length; j++) {
+                if (board[i][j].getStatus() == Field.Status.MOVABLE) {
+                    pickedUpMovableTiles.add(pickUpTile(i, j));
+                }
+            }
+        }
+        return pickedUpMovableTiles;
+    }
 
     /**
-     * Checks if the disposal of the tiles on the board allows the player to end his turn, regarding
-     * the rules. The method needs to know that the game is in the first turn, or not, because that
-     * is a special case.
+     * Checks if the disposal of the tiles on the board allows the player to end his turn, regarding the rules. The
+     * method needs to know that the game is in the first turn, or not, because that is a special case.
      *
      * @param firstTurn <code>true</code> if the game is in the first turn
-     * @return <code>true</code> if the state of the board matches the above condition,
-     * <code>false</code> otherwise
+     * @return <code>true</code> if the state of the board matches the above condition, <code>false</code> otherwise
      */
     public boolean isLegal(boolean firstTurn) {
 
@@ -228,7 +236,6 @@ public class GameBoard {
 
             int tilesInCol = 0;
             for (int i = row; i < BOARD_SIZE; i++) {
-
                 if (board[i][col].getStatus() == Field.Status.MOVABLE) {
                     tilesInCol++;
                 }
@@ -315,8 +322,8 @@ public class GameBoard {
     }
 
     /**
-     * Reads a word horizontally, starting from the given position. It is called by the public
-     * method <code>getPlayedWords</code>.
+     * Reads a word horizontally, starting from the given position. It is called by the public method
+     * <code>getPlayedWords</code>.
      *
      * @param row the row index of the starting position
      * @param col the column index of the starting position
@@ -374,20 +381,19 @@ public class GameBoard {
             if (board[i][col].getStatus() == Field.Status.EMPTY) {
                 break;
             }
-            word.append(board[row][i].getTile().getLetter());
+            word.append(board[i][col].getTile().getLetter());
         }
 
         return word.toString();
     }
 
     /**
-     * Returns a list of the words played in the current turn. The method assumes that the state of
-     * the board allows the player to end his turn regarding the rules, i.e. the
-     * <code>isLegal</code> method returns <code>true</code>, otherwise the return value will be
-     * undefined.
+     * Returns a list of the words played in the current turn. The method assumes that the state of the board allows the
+     * player to end his turn regarding the rules, i.e. the <code>isLegal</code> method returns <code>true</code>,
+     * otherwise the return value will be undefined.
      *
-     * @return a list of strings containing the words played in the current turn, or
-     * <code>null</code> if there were no words played in the current turn
+     * @return a list of strings containing the words played in the current turn, or <code>null</code> if there were no
+     * words played in the current turn
      */
     public List<String> getPlayedWords() {
 
@@ -483,8 +489,8 @@ public class GameBoard {
     }
 
     /**
-     * Calculates the value in points of a word placed horizontally and including the given
-     * position. This method is used by the public <code>calcPoints()</code> method.
+     * Calculates the value in points of a word placed horizontally and including the given position. This method is
+     * used by the public <code>calcPoints()</code> method.
      *
      * @param row the row index of the starting position of the word
      * @param col the column index of the starting position of the word
@@ -522,24 +528,25 @@ public class GameBoard {
 
         // Calculate points.
         for (int j = startCol; j < BOARD_SIZE; j++) {
-            int value = board[row][j].getTile().getValue();
-
             if (board[row][j].getStatus() == Field.Status.EMPTY) {
                 break;
-            } else if (board[row][j].getStatus() == Field.Status.MOVABLE) {
-                switch (board[row][j].getMultiplier()) {
-                    case DLETTER:
-                        pts += 2 * factor * value;
-                        break;
-                    case TLETTER:
-                        pts += 3 * factor * value;
-                        break;
-                    default:
-                        pts += factor * value;
-                        break;
-                }
             } else {
-                pts += factor * value;
+                int value = board[row][j].getTile().getValue();
+                if (board[row][j].getStatus() == Field.Status.MOVABLE) {
+                    switch (board[row][j].getMultiplier()) {
+                        case DLETTER:
+                            pts += 2 * factor * value;
+                            break;
+                        case TLETTER:
+                            pts += 3 * factor * value;
+                            break;
+                        default:
+                            pts += factor * value;
+                            break;
+                    }
+                } else {
+                    pts += factor * value;
+                }
             }
         }
 
@@ -547,8 +554,8 @@ public class GameBoard {
     }
 
     /**
-     * Calculates the value in points of a word placed vertically and including the given position.
-     * This method is used by the public <code>calcPoints()</code> method.
+     * Calculates the value in points of a word placed vertically and including the given position. This method is used
+     * by the public <code>calcPoints()</code> method.
      *
      * @param row the row index of the starting position of the word
      * @param col the column index of the starting position of the word
@@ -586,24 +593,25 @@ public class GameBoard {
 
         // Calculate points.
         for (int i = startRow; i < BOARD_SIZE; i++) {
-            int value = board[i][col].getTile().getValue();
-
             if (board[i][col].getStatus() == Field.Status.EMPTY) {
                 break;
-            } else if (board[i][col].getStatus() == Field.Status.MOVABLE) {
-                switch (board[i][col].getMultiplier()) {
-                    case DLETTER:
-                        pts += 2 * factor * value;
-                        break;
-                    case TLETTER:
-                        pts += 3 * factor * value;
-                        break;
-                    default:
-                        pts += factor * value;
-                        break;
-                }
             } else {
-                pts += factor * value;
+                int value = board[i][col].getTile().getValue();
+                if (board[i][col].getStatus() == Field.Status.MOVABLE) {
+                    switch (board[i][col].getMultiplier()) {
+                        case DLETTER:
+                            pts += 2 * factor * value;
+                            break;
+                        case TLETTER:
+                            pts += 3 * factor * value;
+                            break;
+                        default:
+                            pts += factor * value;
+                            break;
+                    }
+                } else {
+                    pts += factor * value;
+                }
             }
         }
 
@@ -611,13 +619,12 @@ public class GameBoard {
     }
 
     /**
-     * Returns the number of points the player will get in the current turn, based on the current
-     * state of the board. The method assumes that the state of the board allows the player to end
-     * his turn regarding the rules, i.e. the <code>isLegal()</code> method returns
-     * <code>true</code>, otherwise the return value will be undefined.
+     * Returns the number of points the player will get in the current turn, based on the current state of the board.
+     * The method assumes that the state of the board allows the player to end his turn regarding the rules, i.e. the
+     * <code>isLegal()</code> method returns <code>true</code>, otherwise the return value will be undefined.
      *
-     * @return the total number of points gained in the current turn, or undefined value if the
-     * <code>isLegal()</code> method returns <code>false</code>
+     * @return the total number of points gained in the current turn, or undefined value if the <code>isLegal()</code>
+     * method returns <code>false</code>
      */
     public int calcPoints() {
         int pts = 0;
@@ -707,16 +714,27 @@ public class GameBoard {
     public int getMovableTiles() {
         return movableTiles;
     }
+    
+    public boolean isEmpty() {        
+        for (Field[] row : board) {
+            for (Field field : row) {
+                if (field.getStatus() == Field.Status.FIXED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     /**
-     * Checks if the tiles placed on the board in the current turn form grammatically correct words.
-     * If there are no such tiles, the method will return <code>false</code>. The method receives a
-     * {@link Dictionary} object with the words considered correct.
+     * Checks if the tiles placed on the board in the current turn form grammatically correct words. If there are no
+     * such tiles, the method will return <code>false</code>. The method receives a {@link Dictionary} object with the
+     * words considered correct.
      *
      * @param dict the <code>Dictionary</code> object
-     * @return <code>true</code> if all the words placed on the board in the current turn are
-     * correct, <code>false</code> if there are no tiles placed on the board in the current turn, or
-     * there is at least one grammatically incorrect word.
+     * @return <code>true</code> if all the words placed on the board in the current turn are correct,
+     * <code>false</code> if there are no tiles placed on the board in the current turn, or there is at least one
+     * grammatically incorrect word.
      */
     public boolean wordsAreCorrect(Dictionary dict) {
         List<String> playedWords = getPlayedWords();
@@ -736,8 +754,8 @@ public class GameBoard {
     }
 
     /**
-     * Sets the status of each {@code MOVABLE} field to {@code FIXED} and also sets the number of
-     * movable tiles to 0. Is usually called at the end of a turn.
+     * Sets the status of each {@code MOVABLE} field to {@code FIXED} and also sets the number of movable tiles to 0. Is
+     * usually called at the end of a turn.
      */
     public void finalizeFields() {
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -749,14 +767,14 @@ public class GameBoard {
         }
         movableTiles = 0;
     }
-    
+
     public Tile[][] getTiles() {
-    	Tile[][] tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
-    	for (int i = 0; i < BOARD_SIZE; i++) {
-    		for (int j = 0; j < BOARD_SIZE; j++) {
-    			tiles[i][j] = board[i][j].getTile();
-    		}
-    	}
-    	return tiles;
+        Tile[][] tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                tiles[i][j] = board[i][j].getTile();
+            }
+        }
+        return tiles;
     }
 }

@@ -88,15 +88,13 @@ public class ScoreTableController {
         scoreColumn.setCellValueFactory(new PropertyValueFactory<>("score"));
         tableData = FXCollections.observableArrayList();
         
-        update();
+        
         
         scoreTable.setItems(tableData);
     }
 
-    public void update() {
-        tableData.clear();
-        List<String> playerNames = mainCtr.getGameManager().getPlayerNames();
-        List<Integer> playerScores = mainCtr.getGameManager().getPlayerScores();        
+    public void update(List<String> playerNames, List<Integer> playerScores) {
+        tableData.clear();       
         for (int i = 0; i < playerNames.size(); i++) {
             tableData.add(new PlayerScore(playerNames.get(i), playerScores.get(i)));
         }

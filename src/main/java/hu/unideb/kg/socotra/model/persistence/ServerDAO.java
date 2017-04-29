@@ -45,5 +45,5 @@ public interface ServerDAO {
 
     public void disconnectPlayer(PlayerEntity player) throws DBConnectionException;
     
-    public void setServerStatus(ServerEntity server, ServerEntity.ServerState serverState) throws DBConnectionException;
+    public void removeServer(ServerEntity server) throws DBConnectionException;
 }

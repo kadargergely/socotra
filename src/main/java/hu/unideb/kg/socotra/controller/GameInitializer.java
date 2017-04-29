@@ -35,8 +35,9 @@ import java.io.InputStreamReader;
 public class GameInitializer {
 
     public static final int MAX_PLAYERS = 4;
-    public static final int DEFAULT_THINKING_TIME = 180;
+    public static final int DEFAULT_THINKING_TIME_MIN = 3;
     public static final int DEFAULT_TIME_EXTENSIONS = 3;
+    public static final int DEFAULT_EXTENSION_TIME_PERCENTAGE = 50;
 
     private Players players;
     private GameManager gameManager;
@@ -78,7 +79,7 @@ public class GameInitializer {
                 gameManager.addObserver(ai);
             }
         }
-    }    
+    }
 
     public void createServer(int port, LobbyController lobbyController) throws IOException {
         try {
@@ -95,21 +96,25 @@ public class GameInitializer {
         lobbyController.setEndPoint(gameClient);
         gameManager.addObserver(gameClient);
     }
-    
-    public void initializeGame(SocotraApp mainApp, long shuffleSeed) {
-        finalizePlayers(mainApp);
-        players.sortThenShufflePlayers(shuffleSeed);        
-        gameManager.startGame(shuffleSeed);
+
+    public void setThinkingTimeConstraints(int thinkingTime, int extensions, int extensionLength) {
+        gameManager.setThinkingTimeConstraints(thinkingTime, extensions, extensionLength);
     }
-    
+
+    public void initializeGame(SocotraApp mainApp, long shuffleSeed) {
+        players.sortThenShufflePlayers(shuffleSeed);
+        gameManager.setBagSeed(shuffleSeed);
+        finalizePlayers(mainApp);
+    }
+
     public Players getPlayers() {
         return players;
     }
-    
+
     public GameWindowController getGameWindowController() {
         return gameWindowCtr;
     }
-    
+
     public GameManager getGameManager() {
         return gameManager;
     }

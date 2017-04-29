@@ -31,24 +31,33 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Gergely Kadar
  */
 public class NewGameController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NewGameController.class);
 
     @FXML
     private TextField serverNameField;
@@ -58,6 +67,8 @@ public class NewGameController {
     private TextField timeField;
     @FXML
     private TextField timeExtensionsField;
+    @FXML
+    private TextField timeExtensionLengthField;
     @FXML
     private CheckBox privateServerCheckBox;
     @FXML
@@ -140,24 +151,22 @@ public class NewGameController {
     private static final int MIN_NUM_OF_PLAYERS = 2;
 
     private ObservableList<AddedPlayer> tableData;
-    private int remotePlayers;
     private boolean multiplayer;
 
     private SocotraApp mainApp;
     private GameInitializer gameInitializer;
     private ServerDAO serverDAO;
 
-    public NewGameController(SocotraApp mainApp, InputStreamReader inputStream, boolean multiplayer) throws IOException {
-        this(mainApp, inputStream, multiplayer, multiplayer ? null : new ServerDAOImpl());
+    public NewGameController(SocotraApp mainApp, InputStreamReader inputStream) throws IOException {
+        this(mainApp, inputStream, null);
     }
 
-    public NewGameController(SocotraApp mainApp, InputStreamReader inputStream, boolean multiplayer, ServerDAO serverDAO)
+    public NewGameController(SocotraApp mainApp, InputStreamReader inputStream, ServerDAO serverDAO)
             throws IOException {
         this.mainApp = mainApp;
         this.serverDAO = serverDAO;
-        gameInitializer = new GameInitializer(inputStream);
-        remotePlayers = 0;
-        this.multiplayer = multiplayer;
+        this.gameInitializer = new GameInitializer(inputStream);
+        this.multiplayer = false;
     }
 
     @FXML
@@ -168,11 +177,7 @@ public class NewGameController {
         tableData = FXCollections.observableArrayList();
         playersTable.setItems(tableData);
 
-        if (!multiplayer) {
-            serverSettingsPane.setDisable(true);
-        } else {
-            serverPortField.setText(String.valueOf(NetworkManager.DEFAULT_PORT));
-        }
+        serverSettingsPane.setDisable(true);
 
         removePlayerButton.setDisable(true);
         playersTable.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVal, newVal) -> {
@@ -183,8 +188,11 @@ public class NewGameController {
             }
         });
 
+        playersTable.setPlaceholder(new Label(StringConstants.NO_PLAYERS_ADDED));
+
         timeField.setDisable(!limitedTimeCheckBox.isSelected());
         timeExtensionsField.setDisable(!limitedTimeCheckBox.isSelected());
+        timeExtensionLengthField.setDisable(!limitedTimeCheckBox.isSelected());
 
         // enforce numeric values in certain fields
         ChangeListener<String> enforceNumericValues = (observable, oldValue, newValue) -> {
@@ -195,6 +203,7 @@ public class NewGameController {
         serverPortField.textProperty().addListener(enforceNumericValues);
         timeField.textProperty().addListener(enforceNumericValues);
         timeExtensionsField.textProperty().addListener(enforceNumericValues);
+        timeExtensionLengthField.textProperty().addListener(enforceNumericValues);
 
         forwardButton.setDisable(true);
     }
@@ -203,12 +212,15 @@ public class NewGameController {
     private void limitedTimePressed() {
         timeField.setDisable(!limitedTimeCheckBox.isSelected());
         timeExtensionsField.setDisable(!limitedTimeCheckBox.isSelected());
+        timeExtensionLengthField.setDisable(!limitedTimeCheckBox.isSelected());
         if (!limitedTimeCheckBox.isSelected()) {
             timeField.clear();
             timeExtensionsField.clear();
+            timeExtensionLengthField.clear();
         } else {
-            timeField.setText(String.valueOf(GameInitializer.DEFAULT_THINKING_TIME));
+            timeField.setText(String.valueOf(GameInitializer.DEFAULT_THINKING_TIME_MIN));
             timeExtensionsField.setText(String.valueOf(GameInitializer.DEFAULT_TIME_EXTENSIONS));
+            timeExtensionLengthField.setText(String.valueOf(GameInitializer.DEFAULT_EXTENSION_TIME_PERCENTAGE));
         }
     }
 
@@ -218,7 +230,7 @@ public class NewGameController {
                 .map(p -> p.getType())
                 .filter(t -> t.equals(StringConstants.LOCAL_PLAYER))
                 .findAny().isPresent();
-        mainApp.showNewPlayerWindow(new AddPlayerController(this, multiplayer, localHuman));
+        mainApp.showNewPlayerWindow(new AddPlayerController(this, localHuman));
     }
 
     @FXML
@@ -227,8 +239,11 @@ public class NewGameController {
         if (selectedPlayer != null) {
             playersTable.getItems().remove(selectedPlayer);
             gameInitializer.removePlayer(selectedPlayer.getName());
-            if (selectedPlayer.getType().equals(StringConstants.REMOTE_PLAYER)) {
-                remotePlayers--;
+            int remotePlayerCount = (int) gameInitializer.getPlayers().getPlayersList().stream().filter(p -> p.getPlayerType() == Player.PlayerType.REMOTE).count();
+            if (remotePlayerCount == 0) {
+                serverSettingsPane.setDisable(true);
+                serverPortField.clear();
+                multiplayer = false;
             }
         }
         forwardButton.setDisable(tableData.size() < MIN_NUM_OF_PLAYERS);
@@ -237,79 +252,110 @@ public class NewGameController {
 
     @FXML
     private void forwardPressed() {
-        if (multiplayer) {
-            try {
-                // validate server name
-                String serverName = serverNameField.getText();
-                if (serverName == null || serverName.trim().equals("")) {
-                    AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_NAME_TITLE,
-                            StringConstants.INVALID_SERVER_NAME_MSG);
-                    return;
-                }
-                // validate server port
-                String portFieldText = serverPortField.getText();
-                int port;
-                if (!(portFieldText == null || portFieldText.trim().equals(""))) {
-                    port = Integer.valueOf(portFieldText);
-                } else {
-                    AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_PORT_TITLE,
-                            StringConstants.INVALID_SERVER_PORT_MSG);
-                    return;
-                }
-                // validate thinking time
-                Integer thinkingTime = null;
-                Integer timeExtensions = null;
-                String timeFieldText = timeField.getText();
-                String timeExtensionsFieldText = timeExtensionsField.getText();
-                if (limitedTimeCheckBox.isSelected()) {
-                    if (timeFieldText == null || timeExtensionsFieldText == null
-                            || timeFieldText.trim().equals("") || timeExtensionsFieldText.trim().equals("")) {
-                        AlertCreator.showErrorMessage(StringConstants.INVALID_TIMER_PROP_TITLE,
-                                StringConstants.INVALID_TIMER_PROP_MSG);
-                        return;
-                    } else {
-                        thinkingTime = Integer.valueOf(timeFieldText);
-                        timeExtensions = Integer.valueOf(timeExtensionsFieldText);
-                    }
-                }
-                // get external IP address
-//                String externalIp = NetworkUtils.getExternalIpAddress();
-                String externalIp = "127.0.0.1";
-                // create server on database
-                List<PlayerEntity> players = new ArrayList<>();
-                for (AddedPlayer p : tableData) {
-                    PlayerEntity.PlayerType playerType;
-                    switch (p.getType()) {
-                        case StringConstants.COMPUTER:
-                            playerType = PlayerEntity.PlayerType.COMPUTER;
-                            break;
-                        default:
-                            playerType = PlayerEntity.PlayerType.HUMAN;
-                    }
-                    if (p.isDefined()) {
-                        players.add(new PlayerEntity(0, null, p.getName(), playerType, 
-                                !p.getType().equals(StringConstants.REMOTE_PLAYER), p.getPassword(), false));
-                    }
-                }
-                int availablePlaces = (int) tableData.stream().filter(p -> p.getType().equals(StringConstants.REMOTE_PLAYER)).count();
-                ServerEntity serverEntity = new ServerEntity(0, serverName, externalIp, port,
-                        ServerEntity.ServerState.LOBBY, thinkingTime, timeExtensions,
-                        privateServerCheckBox.isSelected(), availablePlaces, players);
-                players.forEach(p -> p.setServer(serverEntity));
-                serverDAO.createServer(serverEntity);
-                // create the server endpoint and jump to the lobby
-                LobbyController lobbyController = new LobbyController(mainApp, gameInitializer, serverDAO, serverEntity);
-                gameInitializer.createServer(NetworkManager.DEFAULT_PORT, lobbyController);                
-                mainApp.showLobbyWindow(lobbyController);
-            } catch (IOException ex) {
-                AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, ex.getMessage());
-            } catch (DBConnectionException ex) {
-                AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.DB_UNREACHABLE_MSG);
-            } catch (ExistingServerNameException ex) {
-                AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.EXISTING_SERVER_NAME_MSG);
+        // validate thinking time
+        Integer thinkingTime = null;
+        Integer timeExtensions = null;
+        Integer timeExtensionLength = null;
+        String timeFieldText = timeField.getText();
+        String timeExtensionsFieldText = timeExtensionsField.getText();
+        String timeExtensionLengthFieldText = timeExtensionLengthField.getText();
+        if (limitedTimeCheckBox.isSelected()) {
+            if (timeFieldText == null || timeExtensionsFieldText == null || timeExtensionLengthFieldText == null
+                    || timeFieldText.trim().length() == 0 || timeExtensionsFieldText.trim().length() == 0 || timeExtensionLengthFieldText.trim().length() == 0) {
+                AlertCreator.showErrorMessage(StringConstants.INVALID_TIMER_PROP_TITLE,
+                        StringConstants.INVALID_TIMER_PROP_MSG);
+                return;
+            } else {
+                thinkingTime = Integer.valueOf(timeFieldText) * 60; // stored in seconds
+                timeExtensions = Integer.valueOf(timeExtensionsFieldText);
+                timeExtensionLength = (Integer.valueOf(timeExtensionLengthFieldText) * thinkingTime) / 100; // percentage converted to actual value
+
+                // add thinking time to the game
+                gameInitializer.setThinkingTimeConstraints(thinkingTime, timeExtensions, timeExtensionLength);
             }
+        }
+
+        if (multiplayer) {
+            // validate server name
+            String serverName = serverNameField.getText();
+            if (serverName == null || serverName.trim().equals("")) {
+                AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_NAME_TITLE,
+                        StringConstants.INVALID_SERVER_NAME_MSG);
+                return;
+            }
+            // validate server port
+            String portFieldText = serverPortField.getText();
+            int port;
+            if (!(portFieldText == null || portFieldText.trim().equals(""))) {
+                port = Integer.valueOf(portFieldText);
+            } else {
+                AlertCreator.showErrorMessage(StringConstants.INVALID_SERVER_PORT_TITLE,
+                        StringConstants.INVALID_SERVER_PORT_MSG);
+                return;
+            }
+            // get external IP address
+//                String externalIp = NetworkUtils.getExternalIpAddress();
+            String externalIp = "127.0.0.1";
+            // create server on database
+            List<PlayerEntity> players = new ArrayList<>();
+            for (AddedPlayer p : tableData) {
+                PlayerEntity.PlayerType playerType;
+                switch (p.getType()) {
+                    case StringConstants.COMPUTER:
+                        playerType = PlayerEntity.PlayerType.COMPUTER;
+                        break;
+                    default:
+                        playerType = PlayerEntity.PlayerType.HUMAN;
+                }
+                if (p.isDefined()) {
+                    players.add(new PlayerEntity(0, null, p.getName(), playerType,
+                            !p.getType().equals(StringConstants.REMOTE_PLAYER), p.getPassword(), false));
+                }
+            }
+            int availablePlaces = (int) tableData.stream().filter(p -> p.getType().equals(StringConstants.REMOTE_PLAYER)).count();
+            ServerEntity serverEntity = new ServerEntity(0, serverName, externalIp, port, thinkingTime, timeExtensions, timeExtensionLength,
+                    privateServerCheckBox.isSelected(), availablePlaces, players);
+            players.forEach(p -> p.setServer(serverEntity));
+
+            WaitDialogController waitDialogController = new WaitDialogController(StringConstants.CREATING_SERVER_IN_PROGRESS);
+            Task<Boolean> createServerTask = new Task<Boolean>() {
+                @Override
+                protected Boolean call() {
+                    Platform.runLater(() -> mainApp.showWaitDialog(waitDialogController));
+                    try {
+                        LOGGER.trace("before createServer");
+                        serverDAO.createServer(serverEntity);
+                        LOGGER.trace("after createServer");
+                        return true;
+                    } catch (DBConnectionException ex) {
+                        Platform.runLater(() -> AlertCreator.showErrorMessage(
+                                StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.DB_UNREACHABLE_MSG));
+                        return false;
+                    } catch (ExistingServerNameException ex) {
+                        Platform.runLater(() -> AlertCreator.showErrorMessage(
+                                StringConstants.SERVER_CREATION_FAILED_TITLE, StringConstants.EXISTING_SERVER_NAME_MSG));
+                        return false;
+                    }
+                }
+            };
+            createServerTask.stateProperty().addListener((observable, oldVal, newVal) -> {
+                if (newVal == Worker.State.SUCCEEDED) {
+                    waitDialogController.close();
+                    // create the server endpoint and jump to the lobby
+                    try {
+                        if (createServerTask.getValue()) {
+                            LobbyController lobbyController = new LobbyController(mainApp, gameInitializer, serverDAO, serverEntity);
+                            gameInitializer.createServer(NetworkManager.DEFAULT_PORT, lobbyController);
+                            mainApp.showLobbyWindow(lobbyController);
+                        }
+                    } catch (IOException ex) {
+                        Platform.runLater(() -> AlertCreator.showErrorMessage(StringConstants.SERVER_CREATION_FAILED_TITLE, ex.getMessage()));
+                    }
+                }
+            });
+            new Thread(createServerTask).start();
         } else {
-            
+
         }
     }
 
@@ -321,6 +367,19 @@ public class NewGameController {
         if (nameExists) {
             throw new AddPlayerException(StringConstants.ENTER_NEW_NAME);
         } else {
+            if (playerType.equals(StringConstants.REMOTE_PLAYER)) {
+                boolean firstRemote = !gameInitializer.getPlayers().getPlayersList().stream()
+                        .filter(p -> p.getPlayerType() == Player.PlayerType.REMOTE)
+                        .findAny().isPresent();
+                if (firstRemote) {
+                    serverSettingsPane.setDisable(false);
+                    serverPortField.setText(String.valueOf(NetworkManager.DEFAULT_PORT));
+                    if (serverDAO == null) {
+                        serverDAO = new ServerDAOImpl();
+                    }
+                    multiplayer = true;
+                }
+            }
             tableData.add(new AddedPlayer(playerName.trim(), playerType, password, defined));
             if (defined) {
                 switch (playerType) {
@@ -339,10 +398,6 @@ public class NewGameController {
 
         addPlayerButton.setDisable(tableData.size() == MAX_NUM_OF_PLAYERS);
         forwardButton.setDisable(tableData.size() < MIN_NUM_OF_PLAYERS);
-
-        if (playerType.equals(StringConstants.REMOTE_PLAYER)) {
-            remotePlayers++;
-        }
     }
 
     public void addPlayer(String playerType, String playerName, String password) throws AddPlayerException {
@@ -355,9 +410,5 @@ public class NewGameController {
 
     public void addPlayer(String playerType, String playerName) throws AddPlayerException {
         addPlayer(playerType, playerName, null);
-    }
-
-    public int getRemotePlayerCount() {
-        return remotePlayers;
     }
 }

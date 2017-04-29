@@ -40,12 +40,6 @@ import javax.persistence.Table;
 @Table(name = "socotra_servers")
 public class ServerEntity implements Serializable {
 
-    public enum ServerState {
-        LOBBY,
-        STARTED,
-        CLOSED
-    }
-
     @Id
     @Column(name = "server_id")
     @SequenceGenerator(name = "IdGenerator", sequenceName = "socotra_server_id_s", allocationSize = 1)
@@ -61,15 +55,14 @@ public class ServerEntity implements Serializable {
     @Column(name = "port")
     private Integer port;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "state")
-    private ServerState serverState;
-
     @Column(name = "thinking_time")
     private Integer thinkingTime;
 
     @Column(name = "time_extensions")
     private Integer timeExtensions;
+
+    @Column(name = "time_extension_length")
+    private Integer timeExtensionsLength;
 
     @Column(name = "private_flag")
     private Boolean privateServer;
@@ -83,15 +76,15 @@ public class ServerEntity implements Serializable {
     public ServerEntity() {
     }
 
-    public ServerEntity(int serverId, String name, String ipAddress, Integer port, ServerState state, Integer thinkingTime,
-            Integer timeExtensions, Boolean privateServer, int availablePlaces, List<PlayerEntity> players) {
+    public ServerEntity(int serverId, String name, String ipAddress, Integer port, Integer thinkingTime,
+            Integer timeExtensions, Integer timeExtensionsLength, Boolean privateServer, int availablePlaces, List<PlayerEntity> players) {
         this.serverId = serverId;
         this.name = name;
         this.ipAddress = ipAddress;
         this.port = port;
-        this.serverState = state;
         this.thinkingTime = thinkingTime;
         this.timeExtensions = timeExtensions;
+        this.timeExtensionsLength = timeExtensionsLength;
         this.privateServer = privateServer;
         this.availablePlaces = availablePlaces;
         this.players = players;
@@ -129,14 +122,6 @@ public class ServerEntity implements Serializable {
         this.port = port;
     }
 
-    public ServerState getServerState() {
-        return serverState;
-    }
-
-    public void setServerState(ServerState serverState) {
-        this.serverState = serverState;
-    }
-
     public Integer getThinkingTime() {
         return thinkingTime;
     }
@@ -151,6 +136,14 @@ public class ServerEntity implements Serializable {
 
     public void setTimeExtensions(Integer timeExtensions) {
         this.timeExtensions = timeExtensions;
+    }
+
+    public Integer getTimeExtensionsLength() {
+        return timeExtensionsLength;
+    }
+
+    public void setTimeExtensionsLength(Integer timeExtensionsLength) {
+        this.timeExtensionsLength = timeExtensionsLength;
     }
 
     public Boolean getPrivateServer() {

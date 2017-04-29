@@ -17,27 +17,11 @@
  */
 package hu.unideb.kg.socotra.controller;
 
-import hu.unideb.kg.socotra.controller.AddPlayerController;
-import hu.unideb.kg.socotra.controller.ChoosePlayerController;
-import hu.unideb.kg.socotra.controller.GameWindowController;
-import hu.unideb.kg.socotra.controller.InitialWindowController;
-import hu.unideb.kg.socotra.controller.JoinServerController;
-import hu.unideb.kg.socotra.controller.LobbyController;
-import hu.unideb.kg.socotra.controller.LoginController;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import hu.unideb.kg.socotra.controller.LoginRegisterController;
-import hu.unideb.kg.socotra.controller.MenuBarController;
-import hu.unideb.kg.socotra.controller.MiddleGridPaneController;
-import hu.unideb.kg.socotra.controller.RegisterController;
-import hu.unideb.kg.socotra.controller.TestWindowController;
-import hu.unideb.kg.socotra.controller.NewGameController;
-import hu.unideb.kg.socotra.model.persistence.ServerDAOImpl;
+import hu.unideb.kg.socotra.util.StringConstants;
 import hu.unideb.kg.socotra.view.ResizableCanvas;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -61,6 +45,8 @@ public class SocotraApp extends Application {
     private static int counter = 0;
 
     private Stage primaryStage;
+    private Stage secondaryStage;
+    
     private Pane loginRegisterWindow;
     private Pane loginPane;
     private Pane registerPane;
@@ -70,10 +56,15 @@ public class SocotraApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
+        this.secondaryStage = new Stage();
+        secondaryStage.initModality(Modality.WINDOW_MODAL);
+        secondaryStage.initOwner(primaryStage);
+        
+        showInitialWindow();
 
-        String dictFile = "/hu_HU.dic";
-        InputStreamReader inputStream = new InputStreamReader(SocotraApp.class.getResourceAsStream(dictFile), "UTF-8");
-        showJoinServerWindow(new JoinServerController(this, inputStream, new ServerDAOImpl()));
+//        String dictFile = "/hu_HU.dic";
+//        InputStreamReader inputStream = new InputStreamReader(SocotraApp.class.getResourceAsStream(dictFile), "UTF-8");
+//        showJoinServerWindow(new JoinServerController(this, inputStream, new ServerDAOImpl()));
 //        showNewGameWindow(new NewGameController(this, inputStream, true, new ServerDAOImpl()));;
 //         showGameWindow(GameWindowController.WindowType.MULTIPLAYER);
         // showTestWindow();
@@ -196,8 +187,8 @@ public class SocotraApp extends Application {
             // Binding the width and height of the canvas to keep its square aspect ratio 
             middleGridPaneCtr.getGridPane().getRowConstraints().get(1).prefHeightProperty().bind(middleGridPaneCtr.getGridPane().widthProperty());
             middleGridPaneCtr.getGridPane().getColumnConstraints().get(1).prefWidthProperty().bind(middleGridPaneCtr.getGridPane().heightProperty());
-            // Repainting the canvas
-            initialWindowCtr.getCanvasController().repaint();
+            // Draw background on canvas
+            initialWindowCtr.getCanvasController().drawBackground();
             
             gridPane.getChildren().add(middleGridPane);
             borderPane.setCenter(gridPane);
@@ -263,8 +254,6 @@ public class SocotraApp extends Application {
                 // Binding the width and height of the canvas to keep its square aspect ratio 
                 middleGridPaneCtr.getGridPane().getRowConstraints().get(1).prefHeightProperty().bind(middleGridPaneCtr.getGridPane().widthProperty());
                 middleGridPaneCtr.getGridPane().getColumnConstraints().get(1).prefWidthProperty().bind(middleGridPaneCtr.getGridPane().heightProperty());
-                // Repainting the canvas
-                gameWindowCtr.getCanvasCtr().repaint();
 
                 // Creating right pane with game history table and buttons
                 AnchorPane rightRootPane = new AnchorPane();
@@ -306,6 +295,8 @@ public class SocotraApp extends Application {
                     gameWindowBorderPane.setPrefSize(1175, 600);
                     primaryStage.setMinWidth(primaryStage.getWidth() - scene.getWidth() + 975);
             }
+            
+            gameWindowCtr.componentsLoaded();
 
             LOGGER.debug("primaryStage.getHeight() = " + String.valueOf(primaryStage.getHeight()));
             LOGGER.debug("scene.getHeight() = " + String.valueOf(scene.getHeight()));
@@ -316,14 +307,13 @@ public class SocotraApp extends Application {
 
     public void showNewGameWindow(NewGameController ctr) {
         try {
-
             AnchorPane rootPane = (AnchorPane) loadNode("/fxmls/NewGame.fxml", ctr);
             Scene scene = new Scene(rootPane);
-            primaryStage.setScene(scene);
-            primaryStage.setTitle("Socotra");
-            primaryStage.setMinWidth(640);
-            primaryStage.setMinHeight(480);
-            primaryStage.show();
+            secondaryStage.setScene(scene);
+            secondaryStage.setTitle(StringConstants.NEW_GAME + " - Socotra");
+            secondaryStage.setMinWidth(640);
+            secondaryStage.setMinHeight(480);
+            secondaryStage.show();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -335,7 +325,7 @@ public class SocotraApp extends Application {
             Scene scene = new Scene(pane);
             Stage stage = new Stage();
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(primaryStage);
+            stage.initOwner(secondaryStage);
             stage.setScene(scene);
             stage.setResizable(false);
             stage.show();
@@ -350,7 +340,7 @@ public class SocotraApp extends Application {
             Scene scene = new Scene(pane);
             Stage stage = new Stage();
             stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(primaryStage);
+            stage.initOwner(secondaryStage);
             stage.setScene(scene);
             stage.setResizable(false);
             stage.show();
@@ -363,11 +353,11 @@ public class SocotraApp extends Application {
         try {
             AnchorPane pane = (AnchorPane) loadNode("/fxmls/Lobby.fxml", ctr);
             Scene scene = new Scene(pane);
-            primaryStage.setScene(scene);
-            primaryStage.setTitle("Socotra");
-            primaryStage.setMinWidth(600);
-            primaryStage.setMinHeight(350);
-            primaryStage.show();
+            secondaryStage.setScene(scene);
+            secondaryStage.setTitle(StringConstants.WAITING_FOR_PLAYERS_WINDOW_TITLE + " - Socotra");
+            secondaryStage.setMinWidth(600);
+            secondaryStage.setMinHeight(350);
+            secondaryStage.show();
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -377,11 +367,28 @@ public class SocotraApp extends Application {
         try {
             AnchorPane pane = (AnchorPane) loadNode("/fxmls/JoinServer.fxml", ctr);
             Scene scene = new Scene(pane);
-            primaryStage.setScene(scene);
-            primaryStage.setTitle("Socotra");
-            primaryStage.setMinWidth(600);
-            primaryStage.setMinHeight(400);
-            primaryStage.show();
+            secondaryStage.setScene(scene);
+            secondaryStage.setTitle(StringConstants.JOIN_GAME_WINDOW_TITLE + " - Socotra");
+            secondaryStage.setMinWidth(600);
+            secondaryStage.setMinHeight(400);
+            secondaryStage.show();
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+    
+    public void showWaitDialog(WaitDialogController ctr) {
+        try {
+            AnchorPane pane = (AnchorPane) loadNode("/fxmls/WaitDialog.fxml", ctr);
+            Scene scene = new Scene(pane);
+            Stage stage = new Stage();
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(secondaryStage);
+            stage.setScene(scene);
+            stage.setTitle(StringConstants.WAITING);
+            stage.setResizable(false);
+            stage.show();
+            LOGGER.trace("end of showWaitDialog");
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
